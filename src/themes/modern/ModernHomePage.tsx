@@ -621,10 +621,13 @@ export default function ModernHomePage({ navigate, articles, seriesList, setting
               </span>
             </div>
 
-            {/* Heading */}
-            <h1 style={{ margin: '0 0 1.375rem', fontSize: 'clamp(1.75rem, 3.5vw, 2.75rem)', fontWeight: 900, letterSpacing: '-0.04em', lineHeight: 1.1, color: ink }}>
-              Gerçek deneyimler.<br />
-              Gerçek insanlar.<br />
+            {/* Heading — white lines */}
+            <p style={{ margin: '0 0 0.5rem', fontSize: 'clamp(1rem, 2vw, 1.35rem)', fontWeight: 700, letterSpacing: '-0.02em', lineHeight: 1.3, color: ink }}>
+              Gerçek deneyimler. Gerçek insanlar.
+            </p>
+
+            {/* Heading — animated gradient tagline */}
+            <h1 style={{ margin: '0 0 1.375rem', fontSize: 'clamp(2rem, 4.5vw, 3.5rem)', fontWeight: 900, letterSpacing: '-0.04em', lineHeight: 1.05 }}>
               <span style={{
                 background: 'linear-gradient(90deg, #8B5CF6, #C084FC, #F97316, #C084FC, #8B5CF6)',
                 backgroundSize: '300% 100%',
