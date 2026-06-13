@@ -1790,6 +1790,30 @@ export default function AdminSettings() {
                 </div>
               </div>
 
+              {/* Hero gradient animasyonu */}
+              <div style={{ background: '#fff', border: '1px solid #e5e7eb', borderRadius: 10, padding: '1.5rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '1rem' }}>
+                <div>
+                  <h2 style={{ fontSize: '0.9375rem', fontWeight: 700, color: '#111', margin: '0 0 0.2rem' }}>Hero gradient animasyonu</h2>
+                  <p style={{ fontSize: '0.8125rem', color: '#9ca3af', margin: 0 }}>Ana sayfadaki renkli başlığın akıcı renk geçiş animasyonunu aç/kapat.</p>
+                </div>
+                <button
+                  onClick={() => set('hero_gradient_animate', settings['hero_gradient_animate'] === 'false' ? 'true' : 'false')}
+                  style={{
+                    width: 44, height: 24, borderRadius: 12, border: 'none', cursor: 'pointer',
+                    background: settings['hero_gradient_animate'] === 'false' ? '#d1d5db' : '#111',
+                    position: 'relative', transition: 'background 0.2s', flexShrink: 0,
+                  }}
+                  role="switch"
+                  aria-checked={settings['hero_gradient_animate'] !== 'false'}
+                >
+                  <span style={{
+                    position: 'absolute', top: 3, left: settings['hero_gradient_animate'] === 'false' ? 3 : 23,
+                    width: 18, height: 18, borderRadius: '50%', background: '#fff',
+                    transition: 'left 0.2s', boxShadow: '0 1px 3px rgba(0,0,0,0.2)',
+                  }} />
+                </button>
+              </div>
+
               {/* Duyuru bandı */}
               <div style={{ background: '#fff', border: '1px solid #e5e7eb', borderRadius: 10, padding: '1.5rem', display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
                 <h2 style={{ fontSize: '0.9375rem', fontWeight: 700, color: '#111', margin: '0 0 0.25rem' }}>Duyuru bandı</h2>

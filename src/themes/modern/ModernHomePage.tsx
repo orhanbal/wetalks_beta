@@ -634,7 +634,8 @@ export default function ModernHomePage({ navigate, articles, seriesList, setting
                 WebkitBackgroundClip: 'text',
                 WebkitTextFillColor: 'transparent',
                 backgroundClip: 'text',
-                animation: 'heroGradientFlow 4s linear infinite',
+                animation: settings['hero_gradient_animate'] === 'false' ? 'none' : 'heroGradientFlow 4s linear infinite',
+                backgroundPosition: settings['hero_gradient_animate'] === 'false' ? '0% 50%' : undefined,
                 display: 'inline',
               }}>
                 {heroTagline}
