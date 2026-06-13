@@ -1,8 +1,8 @@
-import { useState, useRef } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import {
   ArrowRight, ChevronRight, ShoppingCart, Rocket, Code2, Brain,
-  Megaphone, User, Cpu, Star, BookmarkPlus, Check, Mail,
-  TrendingUp, Trophy,
+  Megaphone, User, Star, BookmarkPlus, Check, Mail, TrendingUp,
+  Trophy, Play, Users, Zap, Globe, Target,
 } from 'lucide-react';
 import type { Article } from '../../data/articles';
 import type { Series } from '../../data/series';
@@ -17,21 +17,60 @@ interface ModernHomePageProps {
   settings: Record<string, string>;
 }
 
-const ORANGE = '#F97316';
+/* ─── Theme hook ──────────────────────────────────────── */
+function useDarkTheme() {
+  const [isDark, setIsDark] = useState(() =>
+    document.documentElement.getAttribute('data-theme') === 'dark'
+  );
+  useEffect(() => {
+    const obs = new MutationObserver(() =>
+      setIsDark(document.documentElement.getAttribute('data-theme') === 'dark')
+    );
+    obs.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+    return () => obs.disconnect();
+  }, []);
+  return isDark;
+}
 
-const TOPIC_CONFIG: { key: string; color: string; icon: React.ComponentType<{ size?: number; color?: string }> }[] = [
-  { key: 'E-Ticaret',         color: '#F97316', icon: ShoppingCart },
-  { key: 'Girişimcilik',      color: '#8B5CF6', icon: Rocket },
-  { key: 'Yazılım',           color: '#3B82F6', icon: Code2 },
-  { key: 'Yapay Zekâ',        color: '#10B981', icon: Brain },
-  { key: 'Pazarlama',         color: '#F59E0B', icon: Megaphone },
-  { key: 'Kariyer',           color: '#EF4444', icon: User },
-  { key: 'Teknoloji',         color: '#22C55E', icon: Cpu },
-  { key: 'Liderlik',          color: '#EC4899', icon: Star },
-  { key: 'Marka ve Strateji', color: '#14B8A6', icon: TrendingUp },
-  { key: 'Kişisel Notlar',    color: '#6366F1', icon: Trophy },
-  { key: 'Ticaret',           color: '#F97316', icon: ShoppingCart },
-];
+/* ─── Constants ──────────────────────────────────────── */
+const PURPLE = '#8B5CF6';
+const PINK   = '#EC4899';
+const ORANGE = '#F97316';
+const BLUE   = '#3B82F6';
+const GREEN  = '#10B981';
+const AMBER  = '#F59E0B';
+
+const GRAD_PURPLE_PINK = `linear-gradient(135deg, ${PURPLE}, ${PINK})`;
+
+const CAT_GRADIENT: Record<string, string> = {
+  'E-Ticaret':         `linear-gradient(135deg, ${ORANGE}, #EF4444)`,
+  'Ticaret':           `linear-gradient(135deg, ${ORANGE}, #EF4444)`,
+  'Girişimcilik':      `linear-gradient(135deg, ${PURPLE}, #7C3AED)`,
+  'Yazılım':           `linear-gradient(135deg, ${BLUE}, #2563EB)`,
+  'Yapay Zekâ':        `linear-gradient(135deg, ${GREEN}, #06B6D4)`,
+  'Pazarlama':         `linear-gradient(135deg, ${AMBER}, ${ORANGE})`,
+  'Kariyer':           `linear-gradient(135deg, ${PINK}, #EF4444)`,
+  'Teknoloji':         `linear-gradient(135deg, #6366F1, #4F46E5)`,
+  'Marka ve Strateji': `linear-gradient(135deg, #14B8A6, #06B6D4)`,
+  'Kişisel Notlar':    `linear-gradient(135deg, #64748B, #475569)`,
+  'Liderlik':          `linear-gradient(135deg, ${PURPLE}, ${PINK})`,
+};
+
+const CAT_ICON: Record<string, React.ComponentType<{ size?: number; color?: string }>> = {
+  'E-Ticaret': ShoppingCart, 'Ticaret': ShoppingCart,
+  'Girişimcilik': Rocket, 'Yazılım': Code2,
+  'Yapay Zekâ': Brain, 'Pazarlama': Megaphone,
+  'Kariyer': User, 'Teknoloji': Zap,
+  'Marka ve Strateji': Globe, 'Liderlik': Star,
+  'Kişisel Notlar': Trophy,
+};
+
+function getCatGrad(cat: string): string {
+  return CAT_GRADIENT[cat] ?? `linear-gradient(135deg, ${PURPLE}, ${PINK})`;
+}
+function getCatIcon(cat: string) {
+  return CAT_ICON[cat] ?? Target;
+}
 
 function formatCount(n: number): string {
   if (n >= 1_000_000) return `${(n / 1_000_000).toFixed(1)}M`;
@@ -39,82 +78,110 @@ function formatCount(n: number): string {
   return String(n);
 }
 
-function formatDate(dateStr: string): string {
-  const d = new Date(dateStr);
-  return d.toLocaleDateString('tr-TR', { day: 'numeric', month: 'short', year: 'numeric' });
-}
-
 /* ─── Section Header ─────────────────────────────────── */
-function SectionHead({ title, linkLabel, onLink }: { title: string; linkLabel: string; onLink: () => void }) {
+function SectionHead({
+  label, title, linkLabel, onLink, isDark, icon,
+}: {
+  label?: string; title: string; linkLabel: string;
+  onLink: () => void; isDark: boolean;
+  icon?: React.ReactNode;
+}) {
+  const ink = isDark ? '#fff' : '#111827';
+  const ink3 = isDark ? '#71717A' : '#6B7280';
   return (
     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1.5rem' }}>
-      <h2 style={{ fontSize: '1.5rem', fontWeight: 800, color: '#111', letterSpacing: '-0.025em', margin: 0 }}>{title}</h2>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '0.625rem' }}>
+        {icon && <span>{icon}</span>}
+        {label && (
+          <span style={{
+            fontSize: '0.65rem', fontWeight: 700, letterSpacing: '0.12em',
+            textTransform: 'uppercase', color: PURPLE,
+          }}>{label}</span>
+        )}
+        {!label && <h2 style={{ margin: 0, fontSize: '1.375rem', fontWeight: 800, letterSpacing: '-0.025em', color: ink }}>{title}</h2>}
+        {label && <h2 style={{ margin: 0, fontSize: '1.375rem', fontWeight: 800, letterSpacing: '-0.025em', color: ink }}>{title}</h2>}
+      </div>
       <button
         onClick={onLink}
         style={{
           display: 'inline-flex', alignItems: 'center', gap: '0.35rem',
-          fontSize: '0.8rem', fontWeight: 600, color: '#777',
           background: 'none', border: 'none', cursor: 'pointer',
-          transition: 'color 0.15s',
+          fontSize: '0.8rem', fontWeight: 600, color: ink3,
+          fontFamily: 'inherit', transition: 'color 0.15s',
         }}
-        onMouseEnter={e => (e.currentTarget.style.color = '#111')}
-        onMouseLeave={e => (e.currentTarget.style.color = '#777')}
+        onMouseEnter={e => (e.currentTarget.style.color = ink)}
+        onMouseLeave={e => (e.currentTarget.style.color = ink3)}
       >
-        {linkLabel} <ArrowRight size={14} />
+        {linkLabel} <ArrowRight size={13} />
       </button>
     </div>
   );
 }
 
-/* ─── Hero Author Card ───────────────────────────────── */
+/* ─── Hero Author Card ────────────────────────────────── */
 function HeroAuthorCard({
-  author,
-  style,
-  navigate,
+  author, style, navigate, featured, isDark,
 }: {
-  author: AuthorSummary;
-  style: React.CSSProperties;
-  navigate: (to: string) => void;
+  author: AuthorSummary; style: React.CSSProperties;
+  navigate: (to: string) => void; featured?: boolean; isDark: boolean;
 }) {
-  const initials = (author.full_name ?? 'A').split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase();
+  const initials = (author.full_name ?? 'Y').split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase();
+  const glow = featured
+    ? (isDark ? '0 0 48px rgba(139,92,246,0.5), 0 24px 64px rgba(0,0,0,0.7)' : '0 20px 56px rgba(139,92,246,0.25)')
+    : (isDark ? '0 12px 40px rgba(0,0,0,0.6)' : '0 12px 32px rgba(0,0,0,0.12)');
+
   return (
     <button
       onClick={() => navigate(`author/${author.username ?? author.id}`)}
       style={{
-        position: 'absolute',
-        background: '#fff',
-        borderRadius: 20,
-        overflow: 'hidden',
-        boxShadow: '0 16px 48px rgba(0,0,0,0.14)',
-        border: 'none',
-        cursor: 'pointer',
-        textAlign: 'left',
-        transition: 'transform 0.2s',
+        position: 'absolute', border: 'none', cursor: 'pointer', padding: 0,
+        borderRadius: 20, overflow: 'hidden', background: 'transparent',
+        boxShadow: glow, outline: featured ? `1.5px solid rgba(139,92,246,0.5)` : 'none',
+        transition: 'transform 0.25s, box-shadow 0.25s',
         ...style,
       }}
-      onMouseEnter={e => (e.currentTarget.style.transform = (style.transform ?? '') + ' scale(1.03)')}
+      onMouseEnter={e => (e.currentTarget.style.transform = (style.transform ?? '') + ' scale(1.04)')}
       onMouseLeave={e => (e.currentTarget.style.transform = style.transform as string ?? '')}
     >
-      {/* Author photo */}
-      <div style={{ width: '100%', aspectRatio: '3/2', overflow: 'hidden', background: '#f0ede8', flexShrink: 0 }}>
+      <div style={{ position: 'relative', width: '100%', height: '100%' }}>
+        {/* Photo / bg */}
         {author.avatar_url ? (
           <img src={author.avatar_url} alt={author.full_name ?? ''} style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
         ) : (
-          <div style={{ width: '100%', height: '100%', background: 'linear-gradient(135deg,#f97316,#fb923c)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <span style={{ fontSize: '1.5rem', fontWeight: 800, color: '#fff' }}>{initials}</span>
+          <div style={{ width: '100%', height: '100%', background: getCatGrad('Girişimcilik'), display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <span style={{ fontSize: '2rem', fontWeight: 900, color: '#fff' }}>{initials}</span>
           </div>
         )}
-      </div>
-      {/* Info */}
-      <div style={{ padding: '0.75rem 0.875rem 0.875rem' }}>
-        <div style={{ fontSize: '0.875rem', fontWeight: 700, color: '#111', marginBottom: '0.15rem', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-          {author.full_name ?? 'Yazar'}
-        </div>
-        <div style={{ fontSize: '0.72rem', color: '#888', marginBottom: '0.5rem', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-          {author.title ?? 'Yazar'}
-        </div>
-        <div style={{ fontSize: '0.7rem', color: '#aaa', fontWeight: 500 }}>
-          {author.total_articles} Yazı · {formatCount(author.total_reads)} Okuma
+        {/* Gradient overlay */}
+        <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(0,0,0,0.88) 0%, rgba(0,0,0,0.2) 50%, transparent 100%)' }} />
+        {/* Featured badge */}
+        {featured && (
+          <div style={{ position: 'absolute', top: 12, left: 12 }}>
+            <span style={{ display: 'inline-block', padding: '0.2rem 0.6rem', background: GRAD_PURPLE_PINK, color: '#fff', fontSize: '0.6rem', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', borderRadius: 4 }}>
+              Öne Çıkan Yazar
+            </span>
+          </div>
+        )}
+        {/* Info */}
+        <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, padding: '0.875rem', textAlign: 'left' }}>
+          <div style={{ fontSize: featured ? '1rem' : '0.825rem', fontWeight: 800, color: '#fff', lineHeight: 1.2, marginBottom: '0.25rem' }}>
+            {author.full_name ?? 'Yazar'}
+          </div>
+          <div style={{ fontSize: '0.72rem', color: 'rgba(255,255,255,0.7)', marginBottom: '0.4rem' }}>
+            {author.title ?? ''}
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            <span style={{ fontSize: '0.68rem', color: 'rgba(255,255,255,0.55)' }}>
+              {author.total_articles} Yazı · {formatCount(author.total_reads)} Okuma
+            </span>
+            <span style={{
+              width: 22, height: 22, borderRadius: '50%',
+              background: 'rgba(255,255,255,0.15)', backdropFilter: 'blur(4px)',
+              display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
+            }}>
+              <ArrowRight size={10} color="#fff" />
+            </span>
+          </div>
         </div>
       </div>
     </button>
@@ -122,38 +189,51 @@ function HeroAuthorCard({
 }
 
 /* ─── Featured Author Chip ───────────────────────────── */
-function AuthorChip({ author, navigate }: { author: AuthorSummary; navigate: (to: string) => void }) {
-  const initials = (author.full_name ?? 'A').split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase();
+function AuthorChip({ author, navigate, isDark }: { author: AuthorSummary; navigate: (to: string) => void; isDark: boolean }) {
+  const card = isDark ? 'rgba(255,255,255,0.04)' : '#fff';
+  const border = isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.07)';
+  const ink = isDark ? '#fff' : '#111827';
+  const ink2 = isDark ? '#A1A1AA' : '#6B7280';
+  const initials = (author.full_name ?? 'Y').split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase();
+
   return (
     <button
       onClick={() => navigate(`author/${author.username ?? author.id}`)}
       style={{
         display: 'flex', alignItems: 'center', gap: '0.75rem',
-        padding: '0.875rem 1.125rem',
-        background: '#fff', border: '1px solid #F0EDE8', borderRadius: 14,
+        padding: '0.875rem 1rem', background: card,
+        border: `1px solid ${border}`, borderRadius: 14,
         cursor: 'pointer', textAlign: 'left', flexShrink: 0, minWidth: 200,
-        transition: 'box-shadow 0.2s, transform 0.2s',
+        transition: 'box-shadow 0.2s, border-color 0.2s, transform 0.2s',
       }}
-      onMouseEnter={e => { e.currentTarget.style.boxShadow = '0 6px 24px rgba(0,0,0,0.09)'; e.currentTarget.style.transform = 'translateY(-2px)'; }}
-      onMouseLeave={e => { e.currentTarget.style.boxShadow = 'none'; e.currentTarget.style.transform = 'none'; }}
+      onMouseEnter={e => {
+        e.currentTarget.style.transform = 'translateY(-3px)';
+        e.currentTarget.style.borderColor = isDark ? 'rgba(139,92,246,0.4)' : 'rgba(139,92,246,0.3)';
+        e.currentTarget.style.boxShadow = isDark ? '0 8px 32px rgba(139,92,246,0.25)' : '0 8px 24px rgba(0,0,0,0.09)';
+      }}
+      onMouseLeave={e => {
+        e.currentTarget.style.transform = 'none';
+        e.currentTarget.style.borderColor = border;
+        e.currentTarget.style.boxShadow = 'none';
+      }}
     >
-      <div style={{ width: 48, height: 48, borderRadius: '50%', overflow: 'hidden', flexShrink: 0, background: '#f0ede8' }}>
+      <div style={{ width: 44, height: 44, borderRadius: '50%', overflow: 'hidden', flexShrink: 0, background: '#1a1a2e' }}>
         {author.avatar_url ? (
-          <img src={author.avatar_url} alt={author.full_name ?? ''} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+          <img src={author.avatar_url} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
         ) : (
-          <div style={{ width: '100%', height: '100%', background: ORANGE, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <span style={{ fontSize: '0.85rem', fontWeight: 800, color: '#fff' }}>{initials}</span>
+          <div style={{ width: '100%', height: '100%', background: GRAD_PURPLE_PINK, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <span style={{ fontSize: '0.8rem', fontWeight: 800, color: '#fff' }}>{initials}</span>
           </div>
         )}
       </div>
       <div style={{ minWidth: 0 }}>
-        <div style={{ fontSize: '0.875rem', fontWeight: 700, color: '#111', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: 140 }}>
-          {author.full_name ?? 'Yazar'}
+        <div style={{ fontSize: '0.875rem', fontWeight: 700, color: ink, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: 150 }}>
+          {author.full_name}
         </div>
-        <div style={{ fontSize: '0.72rem', color: '#999', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: 140 }}>
+        <div style={{ fontSize: '0.7rem', color: ink2, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: 150, marginTop: 1 }}>
           {author.title ?? ''}
         </div>
-        <div style={{ fontSize: '0.68rem', color: '#bbb', marginTop: '0.2rem' }}>
+        <div style={{ fontSize: '0.65rem', color: isDark ? '#52525B' : '#9CA3AF', marginTop: 2 }}>
           {author.total_articles} Yazı · {formatCount(author.total_reads)} Okuma
         </div>
       </div>
@@ -161,35 +241,51 @@ function AuthorChip({ author, navigate }: { author: AuthorSummary; navigate: (to
   );
 }
 
-/* ─── Trend Article Card ─────────────────────────────── */
-function TrendCard({ article, navigate }: { article: Article; navigate: (to: string) => void }) {
+/* ─── Article Card ───────────────────────────────────── */
+function ArticleCard({ article, navigate, isDark }: { article: Article; navigate: (to: string) => void; isDark: boolean }) {
   const catColor = getCategoryColor(article.category);
+  const catGrad = getCatGrad(article.category ?? '');
+  const card = isDark ? 'rgba(255,255,255,0.04)' : '#fff';
+  const border = isDark ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.07)';
+  const ink = isDark ? '#F4F4F5' : '#111827';
+  const ink3 = isDark ? '#71717A' : '#9CA3AF';
   const initials = (article.authorName ?? 'Y').split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase();
+
   return (
     <button
       onClick={() => navigate(`article/${article.id}`)}
       style={{
-        background: '#fff', border: 'none', borderRadius: 14,
-        cursor: 'pointer', textAlign: 'left', padding: 0, overflow: 'hidden',
+        background: card, border: `1px solid ${border}`, borderRadius: 16,
+        padding: 0, overflow: 'hidden', cursor: 'pointer', textAlign: 'left',
         display: 'flex', flexDirection: 'column',
-        transition: 'box-shadow 0.2s, transform 0.2s',
+        transition: 'transform 0.2s, box-shadow 0.2s, border-color 0.2s',
       }}
-      onMouseEnter={e => { e.currentTarget.style.boxShadow = '0 8px 28px rgba(0,0,0,0.1)'; e.currentTarget.style.transform = 'translateY(-3px)'; }}
-      onMouseLeave={e => { e.currentTarget.style.boxShadow = 'none'; e.currentTarget.style.transform = 'none'; }}
+      onMouseEnter={e => {
+        e.currentTarget.style.transform = 'translateY(-4px)';
+        e.currentTarget.style.boxShadow = isDark
+          ? '0 12px 40px rgba(139,92,246,0.2)'
+          : '0 12px 32px rgba(0,0,0,0.1)';
+        e.currentTarget.style.borderColor = isDark ? 'rgba(139,92,246,0.3)' : 'rgba(139,92,246,0.2)';
+      }}
+      onMouseLeave={e => {
+        e.currentTarget.style.transform = 'none';
+        e.currentTarget.style.boxShadow = 'none';
+        e.currentTarget.style.borderColor = border;
+      }}
     >
       {/* Image */}
-      <div style={{ position: 'relative', width: '100%', aspectRatio: '16/9', overflow: 'hidden', background: '#f0ede8', flexShrink: 0 }}>
+      <div style={{ position: 'relative', width: '100%', aspectRatio: '16/9', overflow: 'hidden', flexShrink: 0, background: '#0B1020' }}>
         {article.ogImage ? (
-          <img src={article.ogImage} alt={article.title} style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block', transition: 'transform 0.4s ease' }} />
+          <img src={article.ogImage} alt={article.title} style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block', transition: 'transform 0.4s' }} />
         ) : (
-          <div style={{ width: '100%', height: '100%', background: `linear-gradient(135deg, ${catColor.bg}33, ${catColor.bg}66)` }} />
+          <div style={{ width: '100%', height: '100%', background: catGrad, opacity: 0.5 }} />
         )}
-        {/* Category badge overlay */}
+        {/* Category badge */}
         <div style={{ position: 'absolute', bottom: 10, left: 10 }}>
           <span style={{
-            display: 'inline-block', padding: '0.2rem 0.6rem',
+            display: 'inline-block', padding: '0.2rem 0.55rem',
             background: catColor.bg, color: catColor.text,
-            fontSize: '0.6rem', fontWeight: 700, letterSpacing: '0.07em', textTransform: 'uppercase',
+            fontSize: '0.58rem', fontWeight: 700, letterSpacing: '0.07em', textTransform: 'uppercase',
             borderRadius: 4,
           }}>
             {article.category}
@@ -199,107 +295,196 @@ function TrendCard({ article, navigate }: { article: Article; navigate: (to: str
       {/* Body */}
       <div style={{ padding: '0.875rem', flex: 1, display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
         <h3 style={{
-          fontSize: '0.95rem', fontWeight: 800, color: '#111',
-          letterSpacing: '-0.015em', lineHeight: 1.35, margin: 0,
+          margin: 0, fontSize: '0.95rem', fontWeight: 700, color: ink,
+          letterSpacing: '-0.015em', lineHeight: 1.35,
           display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden',
         }}>
           {article.title}
         </h3>
-        {/* Footer */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginTop: 'auto' }}>
-          <div style={{ width: 24, height: 24, borderRadius: '50%', overflow: 'hidden', flexShrink: 0, background: '#f0ede8' }}>
+          <div style={{ width: 22, height: 22, borderRadius: '50%', overflow: 'hidden', flexShrink: 0, background: '#1a1a2e' }}>
             {article.authorAvatar ? (
               <img src={article.authorAvatar} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
             ) : (
-              <div style={{ width: '100%', height: '100%', background: ORANGE, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <span style={{ fontSize: '0.55rem', fontWeight: 800, color: '#fff' }}>{initials}</span>
+              <div style={{ width: '100%', height: '100%', background: GRAD_PURPLE_PINK, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <span style={{ fontSize: '0.5rem', fontWeight: 800, color: '#fff' }}>{initials}</span>
               </div>
             )}
           </div>
-          <span style={{ fontSize: '0.72rem', fontWeight: 600, color: '#555', flex: 1 }}>{article.authorName ?? 'Yazar'}</span>
-          <span style={{ fontSize: '0.7rem', color: '#aaa' }}>{article.readingTime} dk okuma</span>
-          <BookmarkPlus size={14} style={{ color: '#ccc', flexShrink: 0 }} />
+          <span style={{ fontSize: '0.72rem', fontWeight: 500, color: ink3, flex: 1, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+            {article.authorName ?? 'Yazar'}
+          </span>
+          <span style={{ fontSize: '0.68rem', color: ink3, flexShrink: 0 }}>{article.readingTime} dk</span>
+          <BookmarkPlus size={13} style={{ color: ink3, flexShrink: 0 }} />
         </div>
       </div>
     </button>
   );
 }
 
-/* ─── Topic Tile ─────────────────────────────────────── */
-function TopicTile({ config, count, onClick }: {
-  config: typeof TOPIC_CONFIG[number];
-  count: number;
-  onClick: () => void;
+/* ─── Trend Topics Sidebar ────────────────────────────── */
+function TrendTopicsSidebar({ categoryCounts, navigate, isDark }: {
+  categoryCounts: Record<string, number>; navigate: (to: string) => void; isDark: boolean;
 }) {
-  const Icon = config.icon;
+  const bg = isDark ? 'rgba(255,255,255,0.03)' : '#fff';
+  const border = isDark ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.07)';
+  const ink = isDark ? '#F4F4F5' : '#111827';
+  const ink2 = isDark ? '#A1A1AA' : '#6B7280';
+  const rowHover = isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.03)';
+
+  const sorted = Object.entries(categoryCounts)
+    .sort(([, a], [, b]) => b - a)
+    .slice(0, 6);
+
+  return (
+    <div style={{ background: bg, border: `1px solid ${border}`, borderRadius: 16, padding: '1.25rem', position: 'sticky', top: 88 }}>
+      <h3 style={{ margin: '0 0 1.125rem', fontSize: '0.75rem', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: isDark ? PURPLE : '#6B7280' }}>
+        Trend Konular
+      </h3>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
+        {sorted.map(([cat, count]) => {
+          const Icon = getCatIcon(cat);
+          const grad = getCatGrad(cat);
+          return (
+            <button
+              key={cat}
+              onClick={() => navigate(`tag/${encodeURIComponent(cat)}`)}
+              style={{
+                display: 'flex', alignItems: 'center', gap: '0.75rem',
+                padding: '0.625rem 0.625rem', borderRadius: 10, border: 'none',
+                background: 'transparent', cursor: 'pointer', fontFamily: 'inherit',
+                transition: 'background 0.15s',
+              }}
+              onMouseEnter={e => (e.currentTarget.style.background = rowHover)}
+              onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
+            >
+              <div style={{
+                width: 32, height: 32, borderRadius: 8, background: grad,
+                display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
+              }}>
+                <Icon size={15} color="#fff" />
+              </div>
+              <span style={{ flex: 1, fontSize: '0.825rem', fontWeight: 600, color: ink, textAlign: 'left' }}>{cat}</span>
+              <span style={{ fontSize: '0.72rem', fontWeight: 600, color: GREEN }}>{count} Yazı</span>
+            </button>
+          );
+        })}
+      </div>
+      <button
+        onClick={() => navigate('discover')}
+        style={{
+          display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.4rem',
+          width: '100%', marginTop: '1rem', padding: '0.6rem',
+          background: isDark ? 'rgba(139,92,246,0.1)' : 'rgba(139,92,246,0.07)',
+          border: `1px solid rgba(139,92,246,${isDark ? '0.2' : '0.15'})`,
+          borderRadius: 10, cursor: 'pointer', fontFamily: 'inherit',
+          fontSize: '0.78rem', fontWeight: 600, color: PURPLE,
+          transition: 'background 0.15s',
+        }}
+        onMouseEnter={e => (e.currentTarget.style.background = isDark ? 'rgba(139,92,246,0.2)' : 'rgba(139,92,246,0.12)')}
+        onMouseLeave={e => (e.currentTarget.style.background = isDark ? 'rgba(139,92,246,0.1)' : 'rgba(139,92,246,0.07)')}
+      >
+        Tüm Konular <ArrowRight size={13} />
+      </button>
+    </div>
+  );
+}
+
+/* ─── Category Card ──────────────────────────────────── */
+function CategoryCard({ cat, count, navigate, isDark }: { cat: string; count: number; navigate: (to: string) => void; isDark: boolean }) {
+  const Icon = getCatIcon(cat);
+  const grad = getCatGrad(cat);
   return (
     <button
-      onClick={onClick}
+      onClick={() => navigate(`tag/${encodeURIComponent(cat)}`)}
       style={{
-        background: config.color, borderRadius: 14, border: 'none', cursor: 'pointer',
-        display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
-        gap: '0.5rem', padding: '1.25rem 1rem', flexShrink: 0, minWidth: 120,
-        transition: 'filter 0.15s, transform 0.15s',
+        background: grad, borderRadius: 16, border: 'none', cursor: 'pointer',
+        display: 'flex', flexDirection: 'column', justifyContent: 'space-between',
+        padding: '1.25rem', minHeight: 140, flexShrink: 0, minWidth: 150,
+        position: 'relative', overflow: 'hidden', textAlign: 'left',
+        transition: 'transform 0.2s, box-shadow 0.2s',
       }}
-      onMouseEnter={e => { e.currentTarget.style.filter = 'brightness(1.08)'; e.currentTarget.style.transform = 'translateY(-2px)'; }}
-      onMouseLeave={e => { e.currentTarget.style.filter = 'none'; e.currentTarget.style.transform = 'none'; }}
+      onMouseEnter={e => {
+        e.currentTarget.style.transform = 'translateY(-4px)';
+        e.currentTarget.style.boxShadow = isDark ? '0 12px 40px rgba(0,0,0,0.5)' : '0 12px 32px rgba(0,0,0,0.15)';
+      }}
+      onMouseLeave={e => {
+        e.currentTarget.style.transform = 'none';
+        e.currentTarget.style.boxShadow = 'none';
+      }}
     >
-      <Icon size={24} color="#fff" />
-      <span style={{ fontSize: '0.875rem', fontWeight: 700, color: '#fff', whiteSpace: 'nowrap' }}>{config.key}</span>
-      <span style={{ fontSize: '0.7rem', color: 'rgba(255,255,255,0.75)' }}>{count} Yazı</span>
+      <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between' }}>
+        <Icon size={28} color="rgba(255,255,255,0.9)" />
+      </div>
+      <div>
+        <div style={{ fontSize: '0.9rem', fontWeight: 800, color: '#fff', marginBottom: '0.2rem' }}>{cat}</div>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <span style={{ fontSize: '0.72rem', color: 'rgba(255,255,255,0.7)' }}>{count} Yazı</span>
+          <span style={{
+            width: 24, height: 24, borderRadius: '50%',
+            background: 'rgba(255,255,255,0.2)', backdropFilter: 'blur(4px)',
+            display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+          }}>
+            <ArrowRight size={11} color="#fff" />
+          </span>
+        </div>
+      </div>
     </button>
   );
 }
 
-/* ─── Series Card (röportaj/interview style) ─────────── */
-function SeriesInterviewCard({ series, navigate }: { series: Series; navigate: (to: string) => void }) {
+/* ─── Series Interview Card ──────────────────────────── */
+function InterviewCard({ series, navigate }: { series: Series; navigate: (to: string) => void }) {
   return (
     <button
       onClick={() => navigate(`series/${series.id}`)}
       style={{
-        position: 'relative', overflow: 'hidden', borderRadius: 16,
+        position: 'relative', overflow: 'hidden', borderRadius: 18,
         border: 'none', cursor: 'pointer', aspectRatio: '16/10',
         display: 'flex', flexDirection: 'column', justifyContent: 'flex-end',
-        background: '#1a1a1a', transition: 'transform 0.2s',
+        background: '#0B1020', transition: 'transform 0.2s',
+        width: '100%',
       }}
       onMouseEnter={e => (e.currentTarget.style.transform = 'scale(1.02)')}
       onMouseLeave={e => (e.currentTarget.style.transform = 'none')}
     >
       {series.ogImage && (
-        <img
-          src={series.ogImage}
-          alt={series.title}
-          style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', transition: 'transform 0.4s' }}
-        />
+        <img src={series.ogImage} alt={series.title} style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }} />
       )}
-      {/* Gradient overlay */}
-      <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0.4) 50%, transparent 100%)' }} />
+      <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(0,0,0,0.92) 0%, rgba(0,0,0,0.3) 55%, transparent 100%)' }} />
       {/* Badge */}
       <div style={{ position: 'absolute', top: 12, left: 12 }}>
-        <span style={{
-          display: 'inline-block', padding: '0.2rem 0.6rem',
-          background: ORANGE, color: '#fff',
-          fontSize: '0.6rem', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase',
-          borderRadius: 4,
-        }}>
+        <span style={{ display: 'inline-block', padding: '0.2rem 0.6rem', background: 'rgba(139,92,246,0.9)', color: '#fff', fontSize: '0.58rem', fontWeight: 700, letterSpacing: '0.09em', textTransform: 'uppercase', borderRadius: 4 }}>
           SERİ
         </span>
       </div>
+      {/* Play button */}
+      <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <div style={{
+          width: 44, height: 44, borderRadius: '50%',
+          background: 'rgba(255,255,255,0.15)', backdropFilter: 'blur(8px)',
+          border: '1.5px solid rgba(255,255,255,0.25)',
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          transition: 'background 0.2s',
+        }}>
+          <Play size={18} color="#fff" fill="#fff" style={{ marginLeft: 2 }} />
+        </div>
+      </div>
       {/* Content */}
-      <div style={{ position: 'relative', zIndex: 1, padding: '1rem 1.125rem 1.125rem', textAlign: 'left' }}>
+      <div style={{ position: 'relative', zIndex: 1, padding: '1rem 1.125rem', textAlign: 'left' }}>
         <h3 style={{
-          fontSize: '1rem', fontWeight: 800, color: '#fff',
-          letterSpacing: '-0.02em', lineHeight: 1.3, margin: '0 0 0.5rem',
+          margin: '0 0 0.5rem', fontSize: '1rem', fontWeight: 800, color: '#fff',
+          letterSpacing: '-0.02em', lineHeight: 1.3,
           display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden',
         }}>
           {series.title}
         </h3>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-          <span style={{ fontSize: '0.72rem', color: 'rgba(255,255,255,0.7)', fontWeight: 500 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.625rem' }}>
+          <span style={{ fontSize: '0.7rem', color: 'rgba(255,255,255,0.6)' }}>
             {series.articleCount} bölüm
           </span>
           {series.authorName && (
-            <span style={{ fontSize: '0.72rem', color: 'rgba(255,255,255,0.5)' }}>· {series.authorName}</span>
+            <span style={{ fontSize: '0.7rem', color: 'rgba(255,255,255,0.45)' }}>· {series.authorName}</span>
           )}
         </div>
       </div>
@@ -307,247 +492,248 @@ function SeriesInterviewCard({ series, navigate }: { series: Series; navigate: (
   );
 }
 
-/* ─── Newsletter CTA ─────────────────────────────────── */
-function NewsletterCTA() {
+/* ─── Newsletter (inline) ────────────────────────────── */
+function InlineNewsletter({ isDark }: { isDark: boolean }) {
   const [email, setEmail] = useState('');
-  const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error' | 'duplicate'>('idle');
+  const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error' | 'dup'>('idle');
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const submit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!email.trim()) return;
     setStatus('loading');
-    const { error } = await supabase
-      .from('newsletter_subscribers')
-      .insert({ email: email.trim().toLowerCase() });
-    if (error) {
-      setStatus(error.code === '23505' ? 'duplicate' : 'error');
-    } else {
-      setStatus('success');
-      setEmail('');
-    }
+    const { error } = await supabase.from('newsletter_subscribers').insert({ email: email.trim().toLowerCase() });
+    setStatus(!error ? 'success' : error.code === '23505' ? 'dup' : 'error');
+    if (!error) setEmail('');
   };
 
+  const bg = isDark ? 'rgba(255,255,255,0.04)' : '#fff';
+  const border = isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.08)';
+  const ink = isDark ? '#F4F4F5' : '#111827';
+  const ink2 = isDark ? '#A1A1AA' : '#6B7280';
+
   return (
-    <section style={{ background: '#FEF7EE', borderRadius: 24, margin: '0 0 4rem', overflow: 'hidden' }}>
-      <div style={{ maxWidth: 1200, margin: '0 auto', padding: '3rem 2rem', display: 'grid', gridTemplateColumns: '1fr 1.4fr 1.4fr', gap: '2rem', alignItems: 'center' }}>
-        {/* Illustration */}
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-          <div style={{ width: 100, height: 100, borderRadius: '50%', background: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 8px 32px rgba(249,115,22,0.15)' }}>
-            <Mail size={40} color={ORANGE} />
-          </div>
+    <div style={{ background: bg, border: `1px solid ${border}`, borderRadius: 16, padding: '1.5rem' }}>
+      <h3 style={{ margin: '0 0 0.375rem', fontSize: '1rem', fontWeight: 800, color: ink }}>Yeniliklerden haberdar ol!</h3>
+      <p style={{ margin: '0 0 1rem', fontSize: '0.825rem', color: ink2, lineHeight: 1.6 }}>
+        Yeni yazılar ve röportajlar e-postanıza gelsin.
+      </p>
+      {status === 'success' ? (
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: GREEN, fontWeight: 600, fontSize: '0.825rem' }}>
+          <Check size={14} /> Abone oldunuz!
         </div>
-        {/* Text */}
-        <div>
-          <h2 style={{ fontSize: '1.75rem', fontWeight: 900, color: '#111', letterSpacing: '-0.03em', lineHeight: 1.2, margin: '0 0 0.75rem' }}>
-            Topluluğumuza katıl,<br />ilhamı kaçırma.
-          </h2>
-          <p style={{ fontSize: '0.9rem', color: '#888', lineHeight: 1.65, margin: 0 }}>
-            Yeni yazılar, röportajlar ve özel içerikler e-posta kutuna gelsin.
-          </p>
-        </div>
-        {/* Form */}
-        <div>
-          {status === 'success' ? (
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#16a34a', fontWeight: 600, fontSize: '0.9rem' }}>
-              <Check size={16} /> Harika! Bülten listemize eklendiniz.
-            </div>
-          ) : (
-            <form onSubmit={handleSubmit} style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
-              <input
-                type="email"
-                placeholder="E-posta adresiniz"
-                value={email}
-                onChange={e => setEmail(e.target.value)}
-                required
-                disabled={status === 'loading'}
-                style={{
-                  flex: 1, minWidth: 180, height: 46,
-                  padding: '0 1rem', borderRadius: 10,
-                  border: '1.5px solid #e8e5df', background: '#fff',
-                  fontSize: '0.875rem', fontFamily: 'inherit', outline: 'none',
-                  transition: 'border-color 0.15s',
-                }}
-                onFocus={e => (e.currentTarget.style.borderColor = ORANGE)}
-                onBlur={e => (e.currentTarget.style.borderColor = '#e8e5df')}
-              />
-              <button
-                type="submit"
-                disabled={status === 'loading' || !email.trim()}
-                style={{
-                  height: 46, padding: '0 1.25rem',
-                  background: ORANGE, color: '#fff',
-                  border: 'none', borderRadius: 10,
-                  fontSize: '0.875rem', fontWeight: 700, cursor: 'pointer',
-                  fontFamily: 'inherit', whiteSpace: 'nowrap',
-                  transition: 'filter 0.15s',
-                  opacity: status === 'loading' || !email.trim() ? 0.6 : 1,
-                }}
-                onMouseEnter={e => (e.currentTarget.style.filter = 'brightness(1.08)')}
-                onMouseLeave={e => (e.currentTarget.style.filter = 'none')}
-              >
-                Abone Ol
-              </button>
-              {status === 'duplicate' && (
-                <span style={{ width: '100%', fontSize: '0.78rem', color: '#999', marginTop: 4 }}>Bu e-posta zaten kayıtlı.</span>
-              )}
-              {status === 'error' && (
-                <span style={{ width: '100%', fontSize: '0.78rem', color: '#ef4444', marginTop: 4 }}>Bir hata oluştu, tekrar deneyin.</span>
-              )}
-            </form>
-          )}
-        </div>
-      </div>
-    </section>
+      ) : (
+        <form onSubmit={submit} style={{ display: 'flex', gap: '0.5rem' }}>
+          <input
+            type="email" placeholder="E-posta adresinizi girin" value={email}
+            onChange={e => setEmail(e.target.value)} required disabled={status === 'loading'}
+            style={{
+              flex: 1, minWidth: 0, height: 40, padding: '0 0.75rem',
+              background: isDark ? 'rgba(255,255,255,0.06)' : '#F9F9F9',
+              border: `1.5px solid ${isDark ? 'rgba(255,255,255,0.1)' : '#E5E7EB'}`,
+              borderRadius: 8, fontSize: '0.8rem', fontFamily: 'inherit',
+              color: ink, outline: 'none', transition: 'border-color 0.15s',
+            }}
+            onFocus={e => (e.currentTarget.style.borderColor = PURPLE)}
+            onBlur={e => (e.currentTarget.style.borderColor = isDark ? 'rgba(255,255,255,0.1)' : '#E5E7EB')}
+          />
+          <button
+            type="submit" disabled={status === 'loading' || !email.trim()}
+            style={{
+              width: 40, height: 40, borderRadius: 8, border: 'none',
+              background: GRAD_PURPLE_PINK, cursor: 'pointer', flexShrink: 0,
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              opacity: status === 'loading' || !email.trim() ? 0.5 : 1,
+              transition: 'filter 0.15s',
+            }}
+            onMouseEnter={e => (e.currentTarget.style.filter = 'brightness(1.15)')}
+            onMouseLeave={e => (e.currentTarget.style.filter = 'none')}
+          >
+            <ArrowRight size={16} color="#fff" />
+          </button>
+        </form>
+      )}
+      {status === 'dup' && <p style={{ margin: '0.375rem 0 0', fontSize: '0.72rem', color: '#F59E0B' }}>Bu e-posta zaten kayıtlı.</p>}
+      {status === 'error' && <p style={{ margin: '0.375rem 0 0', fontSize: '0.72rem', color: '#EF4444' }}>Bir hata oluştu.</p>}
+    </div>
   );
 }
 
 /* ─── Main Component ─────────────────────────────────── */
 export default function ModernHomePage({ navigate, articles, seriesList, settings }: ModernHomePageProps) {
   const { authors } = useAuthors();
+  const isDark = useDarkTheme();
   const authorsRef = useRef<HTMLDivElement>(null);
 
-  const siteTitle = settings['site_title'] ?? 'WeTalks';
-  const heroTitle = settings['hero_title'] ?? 'Deneyimler konuşur,\nilham bırakır.';
-  const heroSubtitle = settings['hero_subtitle'] ?? 'İş dünyası, girişimcilik, teknoloji ve hayat üzerine gerçek hikayeler. Birinci ağızdan.';
+  const siteTitle = settings['site_title'] ?? 'Site';
+  const heroLabel = settings['hero_label'] ?? 'Deneyimler Konuşur';
+  const heroTagline = settings['hero_tagline'] ?? 'Gerçek ilham.';
+  const heroSubtitle = settings['hero_subtitle'] ?? 'İş dünyası, girişimcilik, e-ticaret, teknoloji ve hayat üzerine gerçek hikayeler. Birinci ağızdan.';
 
+  const bg = isDark ? '#030712' : '#F8F7F4';
+  const bgAlt = isDark ? '#050B15' : '#FFFFFF';
+  const ink = isDark ? '#FFFFFF' : '#111827';
+  const ink2 = isDark ? '#A1A1AA' : '#52525B';
+  const ink3 = isDark ? '#52525B' : '#9CA3AF';
+  const cardBorder = isDark ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.07)';
+
+  const heroAuthors = authors.slice(0, 3);
   const featuredAuthors = authors.slice(0, 6);
-  const trendArticles = articles.slice(0, 8);
+  const trendArticles = articles.slice(0, 4);
+  const displaySeries = seriesList.filter(s => s.ogImage).slice(0, 3).length > 0
+    ? seriesList.filter(s => s.ogImage).slice(0, 3)
+    : seriesList.slice(0, 3);
 
   const categoryCounts: Record<string, number> = {};
   for (const a of articles) {
     if (a.category) categoryCounts[a.category] = (categoryCounts[a.category] ?? 0) + 1;
   }
-  const activeTopics = TOPIC_CONFIG.filter(t => (categoryCounts[t.key] ?? 0) > 0);
-
-  const featuredSeries = seriesList.filter(s => s.ogImage).slice(0, 3);
-  const fallbackSeries = seriesList.slice(0, 3);
-  const displaySeries = featuredSeries.length > 0 ? featuredSeries : fallbackSeries;
-
-  const scrollAuthors = (dir: 1 | -1) => {
-    if (authorsRef.current) authorsRef.current.scrollBy({ left: dir * 240, behavior: 'smooth' });
-  };
+  const activeCategories = Object.entries(categoryCounts)
+    .sort(([, a], [, b]) => b - a)
+    .map(([k]) => k);
 
   return (
-    <div style={{ background: '#FAFAF6', minHeight: '100vh' }}>
+    <div style={{ background: bg, minHeight: '100vh', color: ink }}>
 
-      {/* ── HERO ──────────────────────────────────────────── */}
-      <section style={{ background: '#FAFAF6', padding: '4rem 2rem 3rem', overflow: 'hidden' }}>
-        <div style={{ maxWidth: 1200, margin: '0 auto', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '3rem', alignItems: 'center', minHeight: 460 }}>
+      {/* ─── HERO ──────────────────────────────────────── */}
+      <section style={{ position: 'relative', overflow: 'hidden', padding: 'clamp(2.5rem, 6vw, 5rem) 2rem clamp(3rem, 6vw, 5rem)' }}>
+        {/* Background glow */}
+        {isDark && (
+          <>
+            <div style={{ position: 'absolute', top: -200, left: -200, width: 600, height: 600, borderRadius: '50%', background: 'radial-gradient(ellipse, rgba(139,92,246,0.12) 0%, transparent 70%)', pointerEvents: 'none' }} />
+            <div style={{ position: 'absolute', top: -100, right: 0, width: 700, height: 700, borderRadius: '50%', background: 'radial-gradient(ellipse, rgba(236,72,153,0.08) 0%, transparent 65%)', pointerEvents: 'none' }} />
+          </>
+        )}
+        <div style={{ maxWidth: 1200, margin: '0 auto', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '3rem', alignItems: 'center', minHeight: 480 }}>
 
-          {/* Left: text */}
+          {/* Left */}
           <div style={{ zIndex: 1 }}>
             {/* Label */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', marginBottom: '1.25rem' }}>
-              <div style={{ width: 28, height: 2, background: ORANGE, borderRadius: 2 }} />
-              <span style={{ fontSize: '0.7rem', fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', color: ORANGE }}>
-                {settings['hero_label'] ?? 'Gerçek Deneyimler, Gerçek İnsanlar'}
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', marginBottom: '1.375rem' }}>
+              <div style={{ width: 24, height: 2, background: GRAD_PURPLE_PINK, borderRadius: 2 }} />
+              <span style={{ fontSize: '0.68rem', fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', color: PURPLE }}>
+                {heroLabel}
               </span>
             </div>
 
-            {/* Headline */}
-            <h1 style={{
-              fontSize: 'clamp(2.25rem, 4.5vw, 3.5rem)',
-              fontWeight: 900, letterSpacing: '-0.04em',
-              lineHeight: 1.08, color: '#111', margin: '0 0 1.25rem',
-              whiteSpace: 'pre-line',
-            }}>
-              {heroTitle.replace(/\.$/, '')}<span style={{ color: ORANGE }}>.</span>
+            {/* Heading */}
+            <h1 style={{ margin: '0 0 1.375rem', fontSize: 'clamp(2.5rem, 5vw, 4rem)', fontWeight: 900, letterSpacing: '-0.04em', lineHeight: 1.05, color: ink }}>
+              Gerçek deneyimler.<br />
+              Gerçek insanlar.<br />
+              <span style={{ background: GRAD_PURPLE_PINK, WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>
+                {heroTagline}
+              </span>
             </h1>
 
-            {/* Subtitle */}
-            <p style={{ fontSize: '1rem', color: '#777', lineHeight: 1.75, maxWidth: 440, margin: '0 0 2rem' }}>
+            {/* Description */}
+            <p style={{ margin: '0 0 2rem', fontSize: '1rem', color: ink2, lineHeight: 1.75, maxWidth: 480 }}>
               {heroSubtitle}
             </p>
 
             {/* CTAs */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.875rem', flexWrap: 'wrap' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.875rem', flexWrap: 'wrap', marginBottom: '2rem' }}>
               <button
                 onClick={() => navigate('discover')}
                 style={{
-                  display: 'inline-flex', alignItems: 'center', gap: '0.4rem',
-                  padding: '0.75rem 1.5rem',
-                  background: ORANGE, color: '#fff',
-                  border: 'none', borderRadius: 100,
-                  fontSize: '0.9rem', fontWeight: 700, cursor: 'pointer',
-                  fontFamily: 'inherit', transition: 'filter 0.15s',
-                  boxShadow: '0 4px 16px rgba(249,115,22,0.35)',
+                  display: 'inline-flex', alignItems: 'center', gap: '0.5rem',
+                  padding: '0.75rem 1.5rem', background: GRAD_PURPLE_PINK, color: '#fff',
+                  border: 'none', borderRadius: 12, fontSize: '0.9rem', fontWeight: 700,
+                  cursor: 'pointer', fontFamily: 'inherit', boxShadow: '0 4px 20px rgba(139,92,246,0.35)',
+                  transition: 'filter 0.15s, transform 0.15s',
                 }}
-                onMouseEnter={e => (e.currentTarget.style.filter = 'brightness(1.08)')}
-                onMouseLeave={e => (e.currentTarget.style.filter = 'none')}
+                onMouseEnter={e => { e.currentTarget.style.filter = 'brightness(1.1)'; e.currentTarget.style.transform = 'translateY(-1px)'; }}
+                onMouseLeave={e => { e.currentTarget.style.filter = 'none'; e.currentTarget.style.transform = 'none'; }}
               >
                 Keşfetmeye Başla <ArrowRight size={16} />
               </button>
               <button
                 onClick={() => navigate('discover')}
                 style={{
-                  display: 'inline-flex', alignItems: 'center', gap: '0.4rem',
-                  padding: '0.75rem 1.5rem',
-                  background: 'transparent', color: '#333',
-                  border: '1.5px solid #ddd', borderRadius: 100,
-                  fontSize: '0.9rem', fontWeight: 600, cursor: 'pointer',
-                  fontFamily: 'inherit', transition: 'border-color 0.15s, color 0.15s',
+                  display: 'inline-flex', alignItems: 'center', gap: '0.5rem',
+                  padding: '0.75rem 1.375rem', color: isDark ? '#fff' : '#374151',
+                  background: isDark ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.04)',
+                  backdropFilter: 'blur(8px)',
+                  border: `1px solid ${isDark ? 'rgba(255,255,255,0.15)' : 'rgba(0,0,0,0.1)'}`,
+                  borderRadius: 12, fontSize: '0.9rem', fontWeight: 600,
+                  cursor: 'pointer', fontFamily: 'inherit', transition: 'background 0.15s, border-color 0.15s',
                 }}
-                onMouseEnter={e => { e.currentTarget.style.borderColor = '#111'; e.currentTarget.style.color = '#111'; }}
-                onMouseLeave={e => { e.currentTarget.style.borderColor = '#ddd'; e.currentTarget.style.color = '#333'; }}
+                onMouseEnter={e => {
+                  e.currentTarget.style.background = isDark ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.07)';
+                  e.currentTarget.style.borderColor = isDark ? 'rgba(255,255,255,0.25)' : 'rgba(0,0,0,0.15)';
+                }}
+                onMouseLeave={e => {
+                  e.currentTarget.style.background = isDark ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.04)';
+                  e.currentTarget.style.borderColor = isDark ? 'rgba(255,255,255,0.15)' : 'rgba(0,0,0,0.1)';
+                }}
               >
-                Yazarları Keşfet
+                <Users size={16} /> Yazarları Keşfet
               </button>
             </div>
+
+            {/* Social proof */}
+            {authors.length > 0 && (
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                <div style={{ display: 'flex' }}>
+                  {authors.slice(0, 4).map((a, i) => (
+                    <div key={a.id} style={{
+                      width: 30, height: 30, borderRadius: '50%', overflow: 'hidden',
+                      marginLeft: i > 0 ? -8 : 0, border: `2px solid ${bg}`,
+                      background: '#1a1a2e', flexShrink: 0,
+                    }}>
+                      {a.avatar_url ? (
+                        <img src={a.avatar_url} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                      ) : (
+                        <div style={{ width: '100%', height: '100%', background: GRAD_PURPLE_PINK }} />
+                      )}
+                    </div>
+                  ))}
+                </div>
+                <span style={{ fontSize: '0.78rem', color: ink2 }}>
+                  {formatCount(authors.length * 1000 > 10000 ? authors.length * 1000 : 10000)}+ okur topluluğumuzla büyüyoruz.
+                </span>
+              </div>
+            )}
           </div>
 
-          {/* Right: author cards */}
-          <div style={{ position: 'relative', height: 400, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            {/* Background blobs */}
-            <div style={{ position: 'absolute', top: '10%', right: '5%', width: 200, height: 200, borderRadius: '60% 40% 70% 30% / 50% 60% 40% 50%', background: 'rgba(253,186,116,0.35)', filter: 'blur(2px)' }} />
-            <div style={{ position: 'absolute', top: '30%', left: '5%', width: 160, height: 160, borderRadius: '40% 60% 30% 70% / 60% 40% 60% 40%', background: 'rgba(167,139,250,0.25)', filter: 'blur(2px)' }} />
-            <div style={{ position: 'absolute', bottom: '10%', right: '20%', width: 120, height: 120, borderRadius: '50%', background: 'rgba(147,197,253,0.3)', filter: 'blur(2px)' }} />
+          {/* Right: Author cards */}
+          <div style={{ position: 'relative', height: 460, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            {/* Glow behind cards */}
+            {isDark && (
+              <div style={{ position: 'absolute', top: '20%', left: '20%', right: '20%', height: '60%', borderRadius: '50%', background: 'radial-gradient(ellipse, rgba(139,92,246,0.25) 0%, transparent 70%)', pointerEvents: 'none', filter: 'blur(20px)' }} />
+            )}
 
-            {/* Author cards */}
-            {authors.length > 0 && (
+            {heroAuthors.length > 0 && (
               <>
-                {/* Left card */}
-                {authors[1] && (
-                  <HeroAuthorCard
-                    author={authors[1]}
-                    navigate={navigate}
-                    style={{ width: 155, top: '10%', left: '2%', transform: 'rotate(-6deg)', zIndex: 1 }}
-                  />
+                {heroAuthors[1] && (
+                  <HeroAuthorCard author={heroAuthors[1]} navigate={navigate} isDark={isDark}
+                    style={{ width: 170, height: 240, top: '15%', left: '0%', transform: 'rotate(-6deg)', zIndex: 1 }} />
                 )}
-                {/* Center card (featured) */}
-                {authors[0] && (
-                  <HeroAuthorCard
-                    author={authors[0]}
-                    navigate={navigate}
-                    style={{ width: 185, top: '0%', left: '50%', transform: 'translateX(-50%)', zIndex: 3 }}
-                  />
+                {heroAuthors[0] && (
+                  <HeroAuthorCard author={heroAuthors[0]} navigate={navigate} isDark={isDark} featured
+                    style={{ width: 210, height: 300, top: '5%', left: '50%', transform: 'translateX(-50%)', zIndex: 3 }} />
                 )}
-                {/* Right card */}
-                {authors[2] && (
-                  <HeroAuthorCard
-                    author={authors[2]}
-                    navigate={navigate}
-                    style={{ width: 155, top: '10%', right: '2%', transform: 'rotate(5deg)', zIndex: 2 }}
-                  />
+                {heroAuthors[2] && (
+                  <HeroAuthorCard author={heroAuthors[2]} navigate={navigate} isDark={isDark}
+                    style={{ width: 170, height: 240, top: '15%', right: '0%', transform: 'rotate(5deg)', zIndex: 2 }} />
                 )}
               </>
             )}
 
-            {/* "Tüm yazarları gör" link */}
+            {/* "See all" CTA */}
             <button
               onClick={() => navigate('discover')}
               style={{
-                position: 'absolute', bottom: 0, right: '10%',
-                display: 'inline-flex', alignItems: 'center', gap: '0.35rem',
-                background: ORANGE, color: '#fff',
-                border: 'none', borderRadius: '50%',
-                width: 40, height: 40, cursor: 'pointer',
-                flexShrink: 0, transition: 'transform 0.15s',
+                position: 'absolute', bottom: 0, right: '10%', zIndex: 4,
+                width: 40, height: 40, borderRadius: '50%',
+                background: GRAD_PURPLE_PINK, border: 'none', cursor: 'pointer',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                boxShadow: '0 4px 16px rgba(139,92,246,0.4)',
+                transition: 'transform 0.15s',
               }}
-              onMouseEnter={e => (e.currentTarget.style.transform = 'scale(1.1)')}
-              onMouseLeave={e => (e.currentTarget.style.transform = 'none')}
               title="Tüm yazarları gör"
+              onMouseEnter={e => (e.currentTarget.style.transform = 'scale(1.12)')}
+              onMouseLeave={e => (e.currentTarget.style.transform = 'none')}
             >
-              <ArrowRight size={18} />
+              <ArrowRight size={17} color="#fff" />
             </button>
           </div>
         </div>
@@ -555,82 +741,176 @@ export default function ModernHomePage({ navigate, articles, seriesList, setting
 
       <div style={{ maxWidth: 1200, margin: '0 auto', padding: '0 2rem' }}>
 
-        {/* ── ÖNE ÇIKAN YAZARLAR ─────────────────────────── */}
+        {/* ─── ÖNE ÇIKAN YAZARLAR ──────────────────────── */}
         {featuredAuthors.length > 0 && (
           <section style={{ marginBottom: '4rem' }}>
-            <SectionHead title="Öne Çıkan Yazarlar" linkLabel="Tümünü Göster" onLink={() => navigate('discover')} />
+            <SectionHead
+              title="Öne Çıkan Yazarlar" linkLabel="Tüm Yazarlar" onLink={() => navigate('discover')}
+              isDark={isDark}
+              icon={<Star size={16} color={AMBER} fill={AMBER} />}
+            />
             <div style={{ position: 'relative' }}>
-              <div
-                ref={authorsRef}
-                style={{ display: 'flex', gap: '0.875rem', overflowX: 'auto', paddingBottom: '0.5rem', scrollbarWidth: 'none' }}
-              >
-                {featuredAuthors.map(author => (
-                  <AuthorChip key={author.id} author={author} navigate={navigate} />
-                ))}
+              <div ref={authorsRef} style={{ display: 'flex', gap: '0.875rem', overflowX: 'auto', paddingBottom: '0.375rem', scrollbarWidth: 'none' }}>
+                {featuredAuthors.map(a => <AuthorChip key={a.id} author={a} navigate={navigate} isDark={isDark} />)}
               </div>
-              {/* Scroll arrow */}
               <button
-                onClick={() => scrollAuthors(1)}
+                onClick={() => authorsRef.current?.scrollBy({ left: 260, behavior: 'smooth' })}
                 style={{
-                  position: 'absolute', right: -16, top: '50%', transform: 'translateY(-50%)',
-                  width: 36, height: 36, borderRadius: '50%',
-                  background: '#fff', border: '1.5px solid #e8e5df',
+                  position: 'absolute', right: -14, top: '50%', transform: 'translateY(-50%)',
+                  width: 34, height: 34, borderRadius: '50%',
+                  background: isDark ? '#0B1020' : '#fff', border: `1px solid ${cardBorder}`,
                   display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  cursor: 'pointer', boxShadow: '0 2px 12px rgba(0,0,0,0.08)',
+                  cursor: 'pointer', boxShadow: isDark ? '0 4px 20px rgba(0,0,0,0.5)' : '0 4px 16px rgba(0,0,0,0.08)',
                   transition: 'border-color 0.15s',
                 }}
-                onMouseEnter={e => (e.currentTarget.style.borderColor = '#bbb')}
-                onMouseLeave={e => (e.currentTarget.style.borderColor = '#e8e5df')}
+                onMouseEnter={e => (e.currentTarget.style.borderColor = isDark ? 'rgba(139,92,246,0.5)' : '#999')}
+                onMouseLeave={e => (e.currentTarget.style.borderColor = cardBorder)}
               >
-                <ChevronRight size={16} color="#555" />
+                <ChevronRight size={16} color={isDark ? '#A1A1AA' : '#6B7280'} />
               </button>
             </div>
           </section>
         )}
 
-        {/* ── TREND YAZILAR ──────────────────────────────── */}
+        {/* ─── POPÜLER YAZILAR + TREND KONULAR ─────────── */}
         {trendArticles.length > 0 && (
           <section style={{ marginBottom: '4rem' }}>
-            <SectionHead title="Trend Yazılar" linkLabel="Tüm Yazıları Gör" onLink={() => navigate('contents')} />
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '1.125rem' }}>
-              {trendArticles.slice(0, 4).map(article => (
-                <TrendCard key={article.id} article={article} navigate={navigate} />
-              ))}
-            </div>
-          </section>
-        )}
-
-        {/* ── POPÜLER KONULAR ─────────────────────────────── */}
-        {activeTopics.length > 0 && (
-          <section style={{ marginBottom: '4rem' }}>
-            <SectionHead title="Popüler Konular" linkLabel="Tüm Konuları Gör" onLink={() => navigate('discover')} />
-            <div style={{ display: 'flex', gap: '0.875rem', overflowX: 'auto', paddingBottom: '0.5rem', scrollbarWidth: 'none', alignItems: 'stretch' }}>
-              {activeTopics.map(topic => (
-                <TopicTile
-                  key={topic.key}
-                  config={topic}
-                  count={categoryCounts[topic.key] ?? 0}
-                  onClick={() => navigate(`tag/${encodeURIComponent(topic.key)}`)}
+            <div style={{ display: 'flex', gap: '1.75rem', alignItems: 'flex-start' }}>
+              {/* Articles */}
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <SectionHead
+                  title="Popüler Yazılar" linkLabel="Tüm Yazılar" onLink={() => navigate('contents')}
+                  isDark={isDark}
+                  icon={<Star size={16} color={ORANGE} fill={ORANGE} />}
                 />
-              ))}
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '1rem' }}>
+                  {trendArticles.map(a => <ArticleCard key={a.id} article={a} navigate={navigate} isDark={isDark} />)}
+                </div>
+              </div>
+              {/* Sidebar */}
+              <div style={{ width: 280, flexShrink: 0 }}>
+                <div style={{ marginBottom: '1.5rem' }}>
+                  <span style={{ fontSize: '0.75rem', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: isDark ? PURPLE : '#6B7280' }}>
+                    &nbsp;
+                  </span>
+                </div>
+                <TrendTopicsSidebar categoryCounts={categoryCounts} navigate={navigate} isDark={isDark} />
+              </div>
             </div>
           </section>
         )}
 
-        {/* ── SON SERİLER ─────────────────────────────────── */}
+        {/* ─── KEŞFET / KATEGORİLER ────────────────────── */}
+        {activeCategories.length > 0 && (
+          <section style={{ marginBottom: '4rem' }}>
+            <SectionHead title="Keşfet" linkLabel="Tüm Konular" onLink={() => navigate('discover')} isDark={isDark} />
+            <div style={{ display: 'flex', gap: '1rem', overflowX: 'auto', paddingBottom: '0.375rem', scrollbarWidth: 'none' }}>
+              {activeCategories.slice(0, 8).map(cat => (
+                <CategoryCard key={cat} cat={cat} count={categoryCounts[cat]} navigate={navigate} isDark={isDark} />
+              ))}
+            </div>
+          </section>
+        )}
+      </div>
+
+      {/* ─── YAZAR OL CTA BAND ─────────────────────────── */}
+      <section style={{ padding: '0 2rem', marginBottom: '4rem' }}>
+        <div style={{
+          maxWidth: 1200, margin: '0 auto',
+          background: isDark
+            ? 'linear-gradient(135deg, #0D0B20 0%, #130B2A 35%, #0A0D1E 100%)'
+            : 'linear-gradient(135deg, #F5F3FF 0%, #FDF4FF 50%, #EEF2FF 100%)',
+          borderRadius: 24, padding: '3rem 3rem 3rem',
+          border: `1px solid ${isDark ? 'rgba(139,92,246,0.2)' : 'rgba(139,92,246,0.15)'}`,
+          display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '2rem',
+          position: 'relative', overflow: 'hidden',
+        }}>
+          {isDark && (
+            <div style={{ position: 'absolute', top: -80, right: 200, width: 400, height: 400, borderRadius: '50%', background: 'radial-gradient(ellipse, rgba(139,92,246,0.15) 0%, transparent 70%)', pointerEvents: 'none' }} />
+          )}
+          <div style={{ zIndex: 1 }}>
+            <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', padding: '0.3rem 0.8rem', background: 'rgba(139,92,246,0.15)', border: '1px solid rgba(139,92,246,0.25)', borderRadius: 100, marginBottom: '1.25rem' }}>
+              <span style={{ fontSize: '0.65rem', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: PURPLE }}>
+                Yazar Ol
+              </span>
+            </div>
+            <h2 style={{
+              margin: '0 0 0.875rem', fontSize: 'clamp(1.5rem, 3vw, 2.25rem)',
+              fontWeight: 900, letterSpacing: '-0.03em', lineHeight: 1.1,
+              color: ink,
+            }}>
+              Sen de hikayeni binlerce<br />kişiye ulaştır.
+            </h2>
+            <p style={{ margin: '0 0 1.75rem', fontSize: '0.95rem', color: ink2, maxWidth: 420, lineHeight: 1.7 }}>
+              Deneyimlerini paylaş, topluluğumuza ilham ver.
+            </p>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '1.25rem', flexWrap: 'wrap' }}>
+              <button
+                onClick={() => navigate('register')}
+                style={{
+                  display: 'inline-flex', alignItems: 'center', gap: '0.5rem',
+                  padding: '0.75rem 1.5rem', background: GRAD_PURPLE_PINK,
+                  color: '#fff', border: 'none', borderRadius: 12,
+                  fontSize: '0.9rem', fontWeight: 700, cursor: 'pointer',
+                  fontFamily: 'inherit', boxShadow: '0 4px 20px rgba(139,92,246,0.3)',
+                  transition: 'filter 0.15s',
+                }}
+                onMouseEnter={e => (e.currentTarget.style.filter = 'brightness(1.1)')}
+                onMouseLeave={e => (e.currentTarget.style.filter = 'none')}
+              >
+                Hemen Başla <ArrowRight size={16} />
+              </button>
+              {authors.length > 0 && (
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
+                  <div style={{ display: 'flex' }}>
+                    {authors.slice(0, 3).map((a, i) => (
+                      <div key={a.id} style={{ width: 28, height: 28, borderRadius: '50%', overflow: 'hidden', marginLeft: i > 0 ? -8 : 0, border: `2px solid ${isDark ? '#0D0B20' : '#F5F3FF'}`, background: '#1a1a2e', flexShrink: 0 }}>
+                        {a.avatar_url ? <img src={a.avatar_url} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : <div style={{ width: '100%', height: '100%', background: GRAD_PURPLE_PINK }} />}
+                      </div>
+                    ))}
+                  </div>
+                  <span style={{ fontSize: '0.78rem', color: ink2 }}>+{authors.length * 40}+ yazar bize katıldı</span>
+                </div>
+              )}
+            </div>
+          </div>
+          {/* Illustration */}
+          <div style={{ flexShrink: 0, zIndex: 1, opacity: 0.7 }}>
+            <svg width="120" height="140" viewBox="0 0 120 140" fill="none">
+              <path d="M60 10 L80 40 L110 50 L85 75 L90 110 L60 95 L30 110 L35 75 L10 50 L40 40 Z" stroke={PURPLE} strokeWidth="1.5" fill="none" opacity="0.5" />
+              <path d="M60 25 L72 45 L95 52 L78 68 L82 92 L60 80 L38 92 L42 68 L25 52 L48 45 Z" stroke={PINK} strokeWidth="1" fill="rgba(139,92,246,0.05)" opacity="0.8" />
+              <circle cx="60" cy="60" r="8" fill={PURPLE} opacity="0.4" />
+              <line x1="60" y1="10" x2="60" y2="0" stroke={PURPLE} strokeWidth="2" opacity="0.6" />
+              <line x1="60" y1="110" x2="60" y2="140" stroke={PINK} strokeWidth="1.5" opacity="0.5" />
+              <path d="M20 20 Q35 10 50 20" stroke={PURPLE} strokeWidth="1" fill="none" opacity="0.4" />
+              <path d="M70 115 Q85 130 100 120" stroke={PINK} strokeWidth="1" fill="none" opacity="0.4" />
+            </svg>
+          </div>
+        </div>
+      </section>
+
+      <div style={{ maxWidth: 1200, margin: '0 auto', padding: '0 2rem' }}>
+
+        {/* ─── SERİLER / RÖPORTAJLAR ───────────────────── */}
         {displaySeries.length > 0 && (
           <section style={{ marginBottom: '4rem' }}>
-            <SectionHead title="Son Seriler" linkLabel="Tüm Serileri Gör" onLink={() => navigate('series')} />
+            <SectionHead
+              title="Seriler" linkLabel="Tüm Seriler" onLink={() => navigate('series')}
+              isDark={isDark}
+              icon={<Play size={16} color={PINK} fill={PINK} />}
+            />
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '1.25rem' }}>
-              {displaySeries.map(s => (
-                <SeriesInterviewCard key={s.id} series={s} navigate={navigate} />
-              ))}
+              {displaySeries.map(s => <InterviewCard key={s.id} series={s} navigate={navigate} />)}
             </div>
           </section>
         )}
 
-        {/* ── NEWSLETTER CTA ──────────────────────────────── */}
-        <NewsletterCTA />
+        {/* ─── FOOTER NEWSLETTER (if no series) ────────── */}
+        {displaySeries.length === 0 && (
+          <section style={{ marginBottom: '4rem' }}>
+            <InlineNewsletter isDark={isDark} />
+          </section>
+        )}
 
       </div>
     </div>
