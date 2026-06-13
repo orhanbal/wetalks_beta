@@ -99,7 +99,7 @@ export default function ModernHeader({
             style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0, flexShrink: 0, display: 'flex', alignItems: 'center' }}
           >
             {activeLogo ? (
-              <img src={activeLogo} alt={siteTitle} style={{ height: 26, objectFit: 'contain' }} />
+              <img src={activeLogo} alt={siteTitle} style={{ height: 40, objectFit: 'contain' }} />
             ) : (
               <span className="modern-logo-text">
                 {siteTitle}
