@@ -82,9 +82,9 @@ export default function ModernHeader({
       {/* Header background via inline style (belt-and-suspenders: works even before CSS cascade fires) */}
       <header className={`navbar${scrolled ? ' navbar--scrolled' : ''}`} style={{
         position: 'sticky', top: 0, zIndex: 100,
-        background: scrolled
-          ? (isDark ? 'rgba(5,11,21,0.90)' : 'rgba(248,247,244,0.90)')
-          : (isDark ? 'rgba(3,7,18,0)' : 'rgba(248,247,244,0)'),
+        background: isDark
+          ? (scrolled ? 'rgba(5,11,21,0.92)' : 'rgba(5,11,21,0.85)')
+          : (scrolled ? 'rgba(248,247,244,0.90)' : 'transparent'),
         backdropFilter: scrolled ? 'blur(20px) saturate(180%)' : 'none',
         WebkitBackdropFilter: scrolled ? 'blur(20px) saturate(180%)' : 'none',
         borderBottom: scrolled
