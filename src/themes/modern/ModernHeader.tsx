@@ -83,7 +83,7 @@ export default function ModernHeader({
         position: 'sticky', top: 0, zIndex: 100,
         background: scrolled
           ? (isDark ? 'rgba(5,11,21,0.90)' : 'rgba(248,247,244,0.90)')
-          : 'transparent',
+          : (isDark ? '#030712' : '#F8F7F4'),
         backdropFilter: scrolled ? 'blur(20px) saturate(180%)' : 'none',
         WebkitBackdropFilter: scrolled ? 'blur(20px) saturate(180%)' : 'none',
         borderBottom: scrolled
