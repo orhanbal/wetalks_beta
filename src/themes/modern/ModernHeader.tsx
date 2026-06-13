@@ -81,14 +81,10 @@ export default function ModernHeader({
     <>
       <header className={`navbar${scrolled ? ' navbar--scrolled' : ''}`} style={{
         position: 'sticky', top: 0, zIndex: 100,
-        background: scrolled
-          ? (isDark ? 'rgba(5,11,21,0.90)' : 'rgba(248,247,244,0.90)')
-          : (isDark ? '#030712' : '#F8F7F4'),
-        backdropFilter: scrolled ? 'blur(20px) saturate(180%)' : 'none',
-        WebkitBackdropFilter: scrolled ? 'blur(20px) saturate(180%)' : 'none',
-        borderBottom: scrolled
-          ? `1px solid ${isDark ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.07)'}`
-          : '1px solid transparent',
+        background: isDark ? 'rgba(5,11,21,0.90)' : 'rgba(248,247,244,0.90)',
+        backdropFilter: 'blur(20px) saturate(180%)',
+        WebkitBackdropFilter: 'blur(20px) saturate(180%)',
+        borderBottom: `1px solid ${isDark ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.07)'}`,
         transition: 'background 0.3s, border-color 0.3s',
       }}>
         <div style={{ maxWidth: 1200, margin: '0 auto', padding: '0 2rem', height: 72, display: 'flex', alignItems: 'center', gap: '2rem' }}>
