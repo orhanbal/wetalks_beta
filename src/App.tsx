@@ -209,6 +209,8 @@ export default function App() {
           onSearchOpen={() => setSearchOpen(true)}
           showPollsPage={settings['show_polls_page'] !== 'false'}
           settings={settings}
+          menuItems={settings['menu_items'] ? (() => { try { return JSON.parse(settings['menu_items']); } catch { return undefined; } })() : undefined}
+          seriesList={settings['series_menu_enabled'] !== 'false' ? seriesList : []}
         />
         {searchOpen && (
           <SearchModal
