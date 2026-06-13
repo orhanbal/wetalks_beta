@@ -321,7 +321,7 @@ export default function SeriesPage({ id, navigate, articles, seriesList }: Serie
     description: seriesData.description,
     ogImage: seriesData.ogImage,
     ogType: 'website',
-    canonical: `https://obtalks.tr/#series/${seriesData.id}`,
+    canonical: `https://wetalks.tr/#series/${seriesData.id}`,
   });
 
   const outline = seriesData.outline ?? [];

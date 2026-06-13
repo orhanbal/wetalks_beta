@@ -452,7 +452,7 @@ function TagSection({ tag, articles, navigate, isBookmarked, toggle, user, claps
 }
 
 export default function HomePage({ navigate, articles, seriesList, settings }: HomePageProps) {
-  useSEO({ ogType: 'website', canonical: 'https://obtalks.tr' });
+  useSEO({ ogType: 'website', canonical: 'https://wetalks.tr' });
   const { user } = useAuth();
   const { isBookmarked, toggle } = useBookmarks();
 

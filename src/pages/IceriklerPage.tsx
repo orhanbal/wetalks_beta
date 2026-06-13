@@ -49,7 +49,7 @@ export default function IceriklerPage({ navigate, articles, seriesList }: Icerik
   useSEO({
     title: 'İçerikler',
     description: "Ticaret, e-ticaret, marka, girişimcilik, teknoloji ve yapay zekâ üzerine tüm yazılar.",
-    canonical: 'https://obtalks.tr/#contents',
+    canonical: 'https://wetalks.tr/#contents',
   });
   const { user } = useAuth();
   const { isBookmarked, toggle } = useBookmarks();

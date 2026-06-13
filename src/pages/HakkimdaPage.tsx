@@ -10,7 +10,7 @@ export default function HakkimdaPage({ navigate, settings }: HakkimdaPageProps) 
   useSEO({
     title: 'Bana Dair',
     description: "Ticaretin, teknolojinin ve insanın kesişiminde üretmeye çalışan bir girişimciyim.",
-    canonical: 'https://obtalks.tr/#bana-dair',
+    canonical: 'https://wetalks.tr/#bana-dair',
   });
 
   const authorPhoto = settings['author_photo'] || '';

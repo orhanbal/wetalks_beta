@@ -36,7 +36,7 @@ export default function AdminLogin({ onLogin }: AdminLoginProps) {
       }}>
         <div style={{ marginBottom: '2rem', textAlign: 'center' }}>
           <div style={{ fontSize: '0.75rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', color: '#aaa', marginBottom: '0.5rem' }}>Admin Panel</div>
-          <h1 style={{ fontSize: '1.6rem', fontWeight: 800, color: '#111', margin: 0, letterSpacing: '-0.02em' }}>obtalks</h1>
+          <h1 style={{ fontSize: '1.6rem', fontWeight: 800, color: '#111', margin: 0, letterSpacing: '-0.02em' }}>WeTalks</h1>
           <p style={{ color: '#888', fontSize: '0.9rem', margin: '0.5rem 0 0' }}>Yönetim paneline giriş yapın</p>
         </div>
 
@@ -50,7 +50,7 @@ export default function AdminLogin({ onLogin }: AdminLoginProps) {
               value={email}
               onChange={e => setEmail(e.target.value)}
               required
-              placeholder="admin@obtalks.tr"
+              placeholder="admin@wetalks.tr"
               style={{
                 width: '100%', padding: '0.7rem 1rem', border: '1.5px solid #e5e7eb',
                 borderRadius: 8, fontSize: '0.95rem', fontFamily: 'Inter, sans-serif',

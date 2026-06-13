@@ -97,7 +97,7 @@ function NewsletterForm() {
 }
 
 export default function Footer({ navigate, settings = {} }: FooterProps) {
-  const siteTitle = settings['site_title'] || 'obtalks.tr';
+  const siteTitle = settings['site_title'] || 'wetalks.tr';
   const logoUrl = settings['logo_url'] || '';
   const logoDarkUrl = settings['logo_url_dark'] || '';
   const tagline = settings['footer_tagline'] || 'Türkiye\'de ticaret, e-ticaret, markalaşma, teknoloji ve girişimcilik üzerine sahadan notlar.';
@@ -189,7 +189,7 @@ export default function Footer({ navigate, settings = {} }: FooterProps) {
               </button>
             ))}
           </div>
-          <span>{(settings['site_domain'] || 'obtalks.tr')}</span>
+          <span>{(settings['site_domain'] || 'wetalks.tr')}</span>
         </div>
       </div>
     </footer>

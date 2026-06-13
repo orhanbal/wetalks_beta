@@ -76,9 +76,9 @@ Deno.serve(async (req: Request) => {
     });
 
     const resendApiKey = settings["resend_api_key"];
-    const fromEmail = settings["resend_from_email"] || "bulten@obtalks.tr";
-    const fromName = settings["resend_from_name"] || settings["site_title"] || "obtalks.tr";
-    const siteDomain = settings["site_domain"] || "obtalks.tr";
+    const fromEmail = settings["resend_from_email"] || "bulten@wetalks.tr";
+    const fromName = settings["resend_from_name"] || settings["site_title"] || "wetalks.tr";
+    const siteDomain = settings["site_domain"] || "wetalks.tr";
     const siteUrl = `https://${siteDomain}`;
 
     if (!resendApiKey) {

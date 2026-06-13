@@ -470,7 +470,7 @@ interface AgendaPageProps {
 }
 
 export default function AgendaPage({ navigate, articles, seriesList }: AgendaPageProps) {
-  useSEO({ title: 'Ajanda', canonical: 'https://obtalks.tr/#admin/ajanda' });
+  useSEO({ title: 'Ajanda', canonical: 'https://wetalks.tr/#admin/ajanda' });
   const { user } = useAuth();
 
   const [tasks, setTasks] = useState<AgendaTask[]>([]);

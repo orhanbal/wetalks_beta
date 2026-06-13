@@ -124,7 +124,7 @@ const INTEGRATIONS: Integration[] = [
     status: 'inactive',
     fields: [
       { key: 'resend_api_key', label: 'API Anahtarı', placeholder: 're_xxxxxxxxxxxxxxxxxx', type: 'password' },
-      { key: 'resend_from_email', label: 'Gönderici E-posta', placeholder: 'bulten@obtalks.tr' },
+      { key: 'resend_from_email', label: 'Gönderici E-posta', placeholder: 'bulten@wetalks.tr' },
       { key: 'resend_from_name', label: 'Gönderici Adı', placeholder: 'Orhan Balcı' },
     ],
   },
@@ -286,7 +286,7 @@ function ConfigDrawer({ integration, values, onChange, onSave, onClose, saving, 
                 <div style={{ display: 'flex', gap: '0.5rem' }}>
                   <input
                     readOnly
-                    value="https://obtalks.tr/rss.xml"
+                    value="https://wetalks.tr/rss.xml"
                     style={{
                       flex: 1, padding: '0.5rem 0.75rem', border: '1px solid #e5e7eb',
                       borderRadius: 6, fontSize: '0.875rem', fontFamily: 'Inter, sans-serif',
@@ -294,7 +294,7 @@ function ConfigDrawer({ integration, values, onChange, onSave, onClose, saving, 
                     }}
                   />
                   <button
-                    onClick={() => navigator.clipboard.writeText('https://obtalks.tr/rss.xml')}
+                    onClick={() => navigator.clipboard.writeText('https://wetalks.tr/rss.xml')}
                     style={{
                       padding: '0.5rem 0.875rem', background: '#111', color: '#fff',
                       border: 'none', borderRadius: 6, fontSize: '0.8125rem', fontWeight: 600,

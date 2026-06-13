@@ -72,7 +72,7 @@ export default function TagPage({ id, navigate, articles, seriesList }: TagPageP
   useSEO({
     title: label,
     description,
-    canonical: `https://obtalks.tr/#tag/${id}`,
+    canonical: `https://wetalks.tr/#tag/${id}`,
   });
 
   return (

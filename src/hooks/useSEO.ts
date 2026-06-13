@@ -13,12 +13,12 @@ export interface SEOProps {
   tags?: string[];
 }
 
-const SITE_NAME = 'obtalks.tr';
-const SITE_URL = 'https://obtalks.tr';
-const DEFAULT_TITLE = 'obtalks.tr — Ticaret, E-Ticaret, Teknoloji ve Girişimcilik';
+const SITE_NAME = 'wetalks.tr';
+const SITE_URL = 'https://wetalks.tr';
+const DEFAULT_TITLE = 'wetalks.tr — Ticaret, E-Ticaret, Teknoloji ve Girişimcilik';
 const DEFAULT_DESCRIPTION = "Türkiye'de ticaret, e-ticaret, markalaşma, teknoloji ve girişimcilik üzerine sahadan notlar.";
 const DEFAULT_OG_IMAGE = `${SITE_URL}/og-default.jpg`;
-const TWITTER_HANDLE = '@obtalks';
+const TWITTER_HANDLE = '@wetalks';
 
 function setMeta(selector: string, attr: string, value: string) {
   let el = document.head.querySelector<HTMLMetaElement>(selector);

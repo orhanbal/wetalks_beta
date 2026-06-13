@@ -266,8 +266,8 @@ export default function AuthorPage({ id, navigate, articles, seriesList }: Autho
     title: author?.full_name ?? 'Yazar',
     description: author?.bio ?? '',
     canonical: author?.username
-      ? `https://obtalks.tr/@${author.username}`
-      : `https://obtalks.tr/author/${resolvedId}`,
+      ? `https://wetalks.tr/@${author.username}`
+      : `https://wetalks.tr/author/${resolvedId}`,
   });
 
   const authorArticles = articles.filter(a => a.authorId === resolvedId);

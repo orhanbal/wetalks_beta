@@ -9,7 +9,7 @@ export default function IletisimPage({ settings }: IletisimPageProps) {
   useSEO({
     title: 'İletişim',
     description: 'Fikir paylaşmak, iş birliği yapmak veya merhaba demek için ulaşın.',
-    canonical: 'https://obtalks.tr/#iletisim',
+    canonical: 'https://wetalks.tr/#iletisim',
   });
   const linkedinUrl = settings['linkedin_url'] ?? '';
   const email = settings['email'] ?? '';

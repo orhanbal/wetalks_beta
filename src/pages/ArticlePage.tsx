@@ -306,7 +306,7 @@ export default function ArticlePage({ id, navigate, articles, seriesList }: Arti
 
   const tts = useTTS(ttsText);
 
-  const shareUrl = `https://obtalks.tr/#yazi/${article.id}`;
+  const shareUrl = `https://wetalks.tr/#yazi/${article.id}`;
   const shareText = `${article.title} — Orhan Balcı`;
 
   useSEO({
