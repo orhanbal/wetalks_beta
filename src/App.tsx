@@ -73,10 +73,12 @@ export default function App() {
     document.documentElement.setAttribute('data-banner-shadow', bannerShadow ? 'true' : 'false');
   }, [settings['use_shadows'], settings['banner_shadow']]);
 
-  // Apply site_style attribute for CSS targeting
+  // Apply site_style attribute for CSS targeting — also cache to localStorage so
+  // the inline index.html script can set it synchronously on next load (prevents FOUC)
   useEffect(() => {
     const style = settings['site_style'] ?? 'classic';
     document.documentElement.setAttribute('data-site-style', style);
+    localStorage.setItem('site-style', style);
   }, [settings['site_style']]);
 
   useEffect(() => {
