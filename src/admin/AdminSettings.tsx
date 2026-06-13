@@ -958,6 +958,53 @@ export default function AdminSettings() {
                 </p>
               </div>
 
+              {/* Site theme style card */}
+              <div style={{ background: '#fff', border: '1px solid #e5e7eb', borderRadius: 10, padding: '1.5rem', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                <div>
+                  <h2 style={{ fontSize: '0.9375rem', fontWeight: 700, color: '#111', margin: '0 0 0.25rem' }}>Site Görünümü</h2>
+                  <p style={{ fontSize: '0.8125rem', color: '#9ca3af', margin: 0 }}>Klasik el yapımı CSS teması veya Shadcn UI tabanlı modern Tailwind teması arasında seçim yapın.</p>
+                </div>
+                <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap' }}>
+                  {[
+                    { value: 'classic', label: 'Klasik', desc: 'Özel CSS, magazin düzeni' },
+                    { value: 'modern', label: 'Modern', desc: 'Shadcn UI + Tailwind' },
+                  ].map(opt => {
+                    const active = (settings['site_style'] ?? 'classic') === opt.value;
+                    return (
+                      <button
+                        key={opt.value}
+                        onClick={() => set('site_style', opt.value)}
+                        style={{
+                          padding: '0.75rem 1.25rem',
+                          borderRadius: 10,
+                          cursor: 'pointer',
+                          border: active ? '2px solid #111' : '1px solid #e5e7eb',
+                          background: active ? '#111' : '#fff',
+                          color: active ? '#fff' : '#374151',
+                          fontSize: '0.875rem',
+                          fontWeight: active ? 700 : 500,
+                          fontFamily: 'Inter, sans-serif',
+                          transition: 'all 0.15s',
+                          display: 'flex',
+                          flexDirection: 'column',
+                          alignItems: 'flex-start',
+                          gap: '0.2rem',
+                          minWidth: 140,
+                        }}
+                      >
+                        <span style={{ fontWeight: 700 }}>{opt.label}</span>
+                        <span style={{ fontSize: '0.7rem', opacity: 0.65, fontWeight: 400 }}>{opt.desc}</span>
+                      </button>
+                    );
+                  })}
+                </div>
+                {(settings['site_style'] ?? 'classic') === 'modern' && (
+                  <p style={{ fontSize: '0.775rem', color: '#059669', margin: 0, display: 'flex', alignItems: 'center', gap: '0.375rem' }}>
+                    Modern tema aktif. Değişiklik kaydedildiğinde anında uygulanır.
+                  </p>
+                )}
+              </div>
+
               {/* Default theme card */}
               <div style={{ background: '#fff', border: '1px solid #e5e7eb', borderRadius: 10, padding: '1.5rem', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                 <div>

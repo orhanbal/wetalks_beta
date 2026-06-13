@@ -22,6 +22,15 @@ import CustomPage from './pages/CustomPage';
 import NewArticlesBanner from './components/NewArticlesBanner';
 import PollsPage from './pages/PollsPage';
 
+// Modern theme imports
+import ModernHeader from './themes/modern/ModernHeader';
+import ModernFooter from './themes/modern/ModernFooter';
+import ModernHomePage from './themes/modern/ModernHomePage';
+import ModernContentsPage from './themes/modern/ModernContentsPage';
+import ModernTagPage from './themes/modern/ModernTagPage';
+import ModernAuthorPage from './themes/modern/ModernAuthorPage';
+import ModernSeriesListPage from './themes/modern/ModernSeriesListPage';
+
 function parseMenuOrder(json: string | undefined): { id: string; hidden: boolean }[] {
   if (!json) return [];
   try { return JSON.parse(json); } catch { return []; }
@@ -35,6 +44,8 @@ export default function App() {
   const { settings } = useSiteSettings();
   const [searchOpen, setSearchOpen] = useState(false);
   usePageView(route);
+
+  const isModern = settings['site_style'] === 'modern';
 
   useEffect(() => {
     const handleKey = (e: KeyboardEvent) => {
@@ -62,6 +73,12 @@ export default function App() {
     document.documentElement.setAttribute('data-banner-shadow', bannerShadow ? 'true' : 'false');
   }, [settings['use_shadows'], settings['banner_shadow']]);
 
+  // Apply site_style attribute for CSS targeting
+  useEffect(() => {
+    const style = settings['site_style'] ?? 'classic';
+    document.documentElement.setAttribute('data-site-style', style);
+  }, [settings['site_style']]);
+
   useEffect(() => {
     const font = settings['site_font'];
     const fontName = font && font.trim() ? font.trim() : 'Inter';
@@ -82,7 +99,6 @@ export default function App() {
     document.documentElement.style.setProperty('--site-font', fontStack);
     document.body.style.fontFamily = fontStack;
 
-    // Override all hardcoded Inter references via injected style
     const styleId = '__site_font_override__';
     let styleEl = document.getElementById(styleId) as HTMLStyleElement | null;
     if (!styleEl) {
@@ -108,7 +124,6 @@ export default function App() {
     link.type = ext === 'svg' ? 'image/svg+xml' : ext === 'png' ? 'image/png' : ext === 'ico' ? 'image/x-icon' : 'image/png';
   }, [settings['favicon_url']]);
 
-  // Inject header code (Google Analytics, Meta Pixel, etc.)
   useEffect(() => {
     const code = settings['code_injection_header'];
     if (!code) return;
@@ -118,7 +133,6 @@ export default function App() {
     const container = document.createElement('div');
     container.id = id;
     container.innerHTML = code;
-    // Move script tags to head, other nodes appended to head directly
     Array.from(container.childNodes).forEach(node => {
       if (node.nodeType === Node.ELEMENT_NODE) {
         const el = node as HTMLElement;
@@ -134,7 +148,6 @@ export default function App() {
     });
   }, [settings['code_injection_header']]);
 
-  // Inject footer code (chat widgets, deferred scripts, etc.)
   useEffect(() => {
     const code = settings['code_injection_footer'];
     if (!code) return;
@@ -180,6 +193,66 @@ export default function App() {
     );
   }
 
+  // ── Modern theme render ──────────────────────────────────────
+  if (isModern) {
+    return (
+      <div className="site-wrapper" data-site-style="modern">
+        <ModernHeader
+          navigate={navigate}
+          currentPage={currentPage}
+          logoUrl={settings['logo_url']}
+          logoDarkUrl={settings['logo_url_dark']}
+          siteTitle={settings['site_title']}
+          onSearchOpen={() => setSearchOpen(true)}
+          showPollsPage={settings['show_polls_page'] !== 'false'}
+          settings={settings}
+        />
+        {searchOpen && (
+          <SearchModal
+            articles={articles}
+            seriesList={seriesList}
+            navigate={navigate}
+            onClose={() => setSearchOpen(false)}
+          />
+        )}
+
+        <div className="main-content">
+          {route.page === 'home' && (
+            <ModernHomePage navigate={navigate} articles={articles} seriesList={seriesList} settings={settings} />
+          )}
+          {route.page === 'contents' && (
+            <ModernContentsPage navigate={navigate} articles={articles} seriesList={seriesList} />
+          )}
+          {route.page === 'discover' && (
+            <DiscoverPage navigate={navigate} articles={articles} seriesList={seriesList} />
+          )}
+          {route.page === 'contact' && <IletisimPage settings={settings} />}
+          {route.page === 'login' && <LoginPage navigate={navigate} />}
+          {route.page === 'register' && <RegisterPage navigate={navigate} />}
+          {route.page === 'profile' && <ProfilePage navigate={navigate} articles={articles} seriesList={seriesList} />}
+          {route.page === 'writer-dashboard' && <WriterDashboard navigate={navigate} articles={articles} seriesList={seriesList} />}
+          {route.page === 'article' && (
+            <ArticlePage id={route.id} navigate={navigate} articles={articles} seriesList={seriesList} />
+          )}
+          {route.page === 'series' && (
+            <SeriesPage id={route.id} navigate={navigate} articles={articles} seriesList={seriesList} />
+          )}
+          {route.page === 'tag' && (
+            <ModernTagPage id={route.id} navigate={navigate} articles={articles} seriesList={seriesList} />
+          )}
+          {route.page === 'author' && (
+            <ModernAuthorPage id={route.id} navigate={navigate} articles={articles} seriesList={seriesList} />
+          )}
+          {route.page === 'polls' && <PollsPage />}
+          {route.page === 'custom-page' && <CustomPage slug={route.slug} navigate={navigate} />}
+
+          <ModernFooter navigate={navigate} settings={settings} />
+        </div>
+      </div>
+    );
+  }
+
+  // ── Classic theme render ─────────────────────────────────────
   return (
     <div className="site-wrapper">
       <Header
