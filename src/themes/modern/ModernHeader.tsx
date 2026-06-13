@@ -20,13 +20,19 @@ const GRAD_PURPLE_PINK = 'linear-gradient(135deg, #8B5CF6, #EC4899)';
 const PURPLE = '#8B5CF6';
 
 function useDarkTheme() {
-  const [isDark, setIsDark] = useState(() =>
-    document.documentElement.getAttribute('data-theme') === 'dark'
-  );
+  const [isDark, setIsDark] = useState(() => {
+    const attr = document.documentElement.getAttribute('data-theme');
+    if (attr) return attr === 'dark';
+    const stored = localStorage.getItem('theme-pref') as 'system' | 'light' | 'dark' | null;
+    if (stored === 'dark') return true;
+    if (stored === 'light') return false;
+    return window.matchMedia('(prefers-color-scheme: dark)').matches;
+  });
   useEffect(() => {
-    const obs = new MutationObserver(() =>
-      setIsDark(document.documentElement.getAttribute('data-theme') === 'dark')
-    );
+    const update = () =>
+      setIsDark(document.documentElement.getAttribute('data-theme') === 'dark');
+    update();
+    const obs = new MutationObserver(update);
     obs.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
     return () => obs.disconnect();
   }, []);
