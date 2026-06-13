@@ -601,7 +601,7 @@ export default function ModernHomePage({ navigate, articles, seriesList, setting
     <div style={{ background: bg, minHeight: '100vh', color: ink }}>
 
       {/* ─── HERO ──────────────────────────────────────── */}
-      <section style={{ position: 'relative', overflow: 'hidden', padding: 'clamp(2.5rem, 6vw, 5rem) 2rem clamp(3rem, 6vw, 5rem)' }}>
+      <section style={{ position: 'relative', overflow: 'hidden', padding: 'clamp(6rem, 10vw, 8rem) 2rem clamp(3rem, 6vw, 5rem)' }}>
         {/* Background glow */}
         {isDark && (
           <>
