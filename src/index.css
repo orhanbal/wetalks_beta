@@ -63,6 +63,11 @@
    Editorial · Typographic · Premium Magazine
    ═══════════════════════════════════════════════════════════════════ */
 
+@keyframes heroGradientFlow {
+  0%   { background-position: 0% 50%; }
+  100% { background-position: 100% 50%; }
+}
+
 [data-site-style="modern"] {
   --m-bg: #F8F7F4;
   --m-surface: #FFFFFF;

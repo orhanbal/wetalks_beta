@@ -622,10 +622,18 @@ export default function ModernHomePage({ navigate, articles, seriesList, setting
             </div>
 
             {/* Heading */}
-            <h1 style={{ margin: '0 0 1.375rem', fontSize: 'clamp(2.5rem, 5vw, 4rem)', fontWeight: 900, letterSpacing: '-0.04em', lineHeight: 1.05, color: ink }}>
+            <h1 style={{ margin: '0 0 1.375rem', fontSize: 'clamp(1.75rem, 3.5vw, 2.75rem)', fontWeight: 900, letterSpacing: '-0.04em', lineHeight: 1.1, color: ink }}>
               Gerçek deneyimler.<br />
               Gerçek insanlar.<br />
-              <span style={{ background: GRAD_PURPLE_PINK, WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>
+              <span style={{
+                background: 'linear-gradient(90deg, #8B5CF6, #C084FC, #F97316, #C084FC, #8B5CF6)',
+                backgroundSize: '300% 100%',
+                WebkitBackgroundClip: 'text',
+                WebkitTextFillColor: 'transparent',
+                backgroundClip: 'text',
+                animation: 'heroGradientFlow 4s linear infinite',
+                display: 'inline',
+              }}>
                 {heroTagline}
               </span>
             </h1>
