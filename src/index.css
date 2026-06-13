@@ -64,15 +64,15 @@
    ═══════════════════════════════════════════════════════════════════ */
 
 [data-site-style="modern"] {
-  --m-bg: #F9F8F6;
+  --m-bg: #FAFAF6;
   --m-surface: #FFFFFF;
-  --m-border: #E8E5DF;
-  --m-border-strong: #D1CEC6;
-  --m-ink: #0D0D0D;
-  --m-ink-2: #3A3A3A;
-  --m-ink-3: #717070;
-  --m-ink-4: #A0A09E;
-  --m-accent: var(--accent, #0D0D0D);
+  --m-border: #F0EDE8;
+  --m-border-strong: #DDD9D1;
+  --m-ink: #111111;
+  --m-ink-2: #333333;
+  --m-ink-3: #777777;
+  --m-ink-4: #AAAAAA;
+  --m-accent: #F97316;
   --m-radius-sm: 6px;
   --m-radius: 12px;
   --m-radius-lg: 20px;

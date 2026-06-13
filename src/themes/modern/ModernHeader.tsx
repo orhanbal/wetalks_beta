@@ -1,9 +1,8 @@
 import { useState, useEffect } from 'react';
-import { Search, Menu, X, Sun, Moon, Monitor, LogIn, CircleUser as UserCircle } from 'lucide-react';
+import { Search, Menu, X, Sun, Moon, Monitor, LogIn } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
 import { useDarkMode, type ThemePreference } from '../../hooks/useDarkMode';
 import type { Series } from '../../data/series';
-import type { AuthorSummary } from '../../hooks/useData';
 
 interface ModernHeaderProps {
   navigate: (to: string) => void;
@@ -17,8 +16,10 @@ interface ModernHeaderProps {
   settings?: Record<string, string>;
 }
 
+const ORANGE = '#F97316';
+
 const NAV_LINKS = [
-  { label: 'Anasayfa', path: '' },
+  { label: 'Yazarlar', path: 'discover' },
   { label: 'Yazılar', path: 'contents' },
   { label: 'Seriler', path: 'series' },
   { label: 'Keşfet', path: 'discover' },
@@ -34,7 +35,7 @@ export default function ModernHeader({
   showPollsPage,
   settings = {},
 }: ModernHeaderProps) {
-  const { user } = useAuth();
+  const { user, signOut } = useAuth();
   const siteDefault = (settings['default_theme'] as ThemePreference) || 'system';
   const { preference, setPreference } = useDarkMode(siteDefault);
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -65,165 +66,158 @@ export default function ModernHeader({
 
   const ThemeIcon = preference === 'dark' ? Moon : preference === 'light' ? Sun : Monitor;
   const navLinks = [...NAV_LINKS, ...(showPollsPage ? [{ label: 'Anketler', path: 'polls' }] : [])];
-  const isActive = (path: string) => currentPage === path || (path === '' && currentPage === 'home');
+  const isActive = (path: string) => currentPage === path || (path === '' && currentPage === 'home') || (path === 'discover' && (currentPage === 'discover' || currentPage === ''));
 
-  const headerStyle: React.CSSProperties = {
-    position: 'sticky',
-    top: 0,
-    zIndex: 100,
-    background: scrolled ? 'rgba(249,248,246,0.9)' : 'transparent',
-    backdropFilter: scrolled ? 'blur(20px) saturate(180%)' : 'none',
-    WebkitBackdropFilter: scrolled ? 'blur(20px) saturate(180%)' : 'none',
-    borderBottom: scrolled ? '1px solid var(--m-border, #E8E5DF)' : '1px solid transparent',
-    transition: 'background 0.3s ease, border-color 0.3s ease, backdrop-filter 0.3s ease',
-  };
+  const BG = isDark ? 'rgba(12,12,12,0.92)' : 'rgba(250,250,246,0.92)';
+  const BORDER = isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.07)';
+  const INK = isDark ? '#F0EDE8' : '#111';
+  const INK3 = isDark ? '#888' : '#666';
 
-  const headerStyleDark: React.CSSProperties = {
-    ...headerStyle,
-    background: scrolled ? 'rgba(12,12,12,0.9)' : 'transparent',
-  };
-
-  const iconBtnStyle: React.CSSProperties = {
-    display: 'inline-flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    width: 36,
-    height: 36,
-    borderRadius: 8,
-    border: 'none',
-    background: 'transparent',
-    color: 'var(--m-ink-3, #717070)',
-    cursor: 'pointer',
-    transition: 'background 0.15s, color 0.15s',
-    flexShrink: 0,
-  };
+  const headerBg = scrolled ? BG : 'transparent';
+  const headerBorder = scrolled ? `1px solid ${BORDER}` : '1px solid transparent';
 
   return (
     <>
-      <header style={isDark ? headerStyleDark : headerStyle}>
+      <header style={{
+        position: 'sticky', top: 0, zIndex: 100,
+        background: headerBg,
+        backdropFilter: scrolled ? 'blur(20px) saturate(160%)' : 'none',
+        WebkitBackdropFilter: scrolled ? 'blur(20px) saturate(160%)' : 'none',
+        borderBottom: headerBorder,
+        transition: 'background 0.3s ease, border-color 0.3s ease',
+      }}>
         <div style={{ maxWidth: 1200, margin: '0 auto', padding: '0 2rem', height: 64, display: 'flex', alignItems: 'center', gap: '2rem' }}>
-          {/* Logo / Wordmark */}
+
+          {/* Logo */}
           <button
             onClick={() => navigate('')}
-            style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0, flexShrink: 0 }}
+            style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0, flexShrink: 0, display: 'flex', alignItems: 'center', gap: '0.25rem' }}
           >
             {activeLogo ? (
-              <img src={activeLogo} alt={siteTitle} style={{ height: 28, objectFit: 'contain', display: 'block' }} />
+              <img src={activeLogo} alt={siteTitle} style={{ height: 28, objectFit: 'contain' }} />
             ) : (
-              <span style={{
-                fontSize: '1.15rem',
-                fontWeight: 900,
-                letterSpacing: '-0.04em',
-                color: 'var(--m-ink, #0D0D0D)',
-                fontFamily: 'inherit',
-                lineHeight: 1,
-              }}>
+              <span style={{ fontSize: '1.2rem', fontWeight: 900, letterSpacing: '-0.04em', color: INK, fontFamily: 'inherit', lineHeight: 1 }}>
                 {siteTitle}
+                <span style={{ color: ORANGE }}>.</span>
               </span>
             )}
           </button>
 
-          {/* Desktop nav */}
-          <nav style={{ display: 'flex', alignItems: 'center', gap: '0.125rem', flex: 1 }}>
+          {/* Desktop nav — centered */}
+          <nav style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.25rem' }}>
             {navLinks.map(link => (
               <button
-                key={link.path}
+                key={link.label}
                 onClick={() => navigate(link.path)}
                 style={{
-                  fontSize: '0.82rem',
-                  fontWeight: isActive(link.path) ? 600 : 500,
-                  color: isActive(link.path) ? 'var(--m-ink, #0D0D0D)' : 'var(--m-ink-3, #717070)',
-                  background: isActive(link.path) ? 'rgba(13,13,13,0.07)' : 'transparent',
-                  border: 'none',
-                  borderRadius: 6,
-                  padding: '0.4rem 0.75rem',
-                  cursor: 'pointer',
-                  fontFamily: 'inherit',
-                  whiteSpace: 'nowrap',
-                  transition: 'background 0.15s, color 0.15s',
+                  fontSize: '0.875rem',
+                  fontWeight: isActive(link.path) ? 700 : 500,
+                  color: isActive(link.path) ? INK : INK3,
+                  background: 'none',
+                  border: 'none', borderRadius: 8,
+                  padding: '0.4rem 0.875rem',
+                  cursor: 'pointer', fontFamily: 'inherit', whiteSpace: 'nowrap',
+                  transition: 'color 0.15s',
                 }}
-                onMouseEnter={e => {
-                  if (!isActive(link.path)) {
-                    (e.currentTarget as HTMLButtonElement).style.color = 'var(--m-ink, #0D0D0D)';
-                    (e.currentTarget as HTMLButtonElement).style.background = 'rgba(13,13,13,0.05)';
-                  }
-                }}
-                onMouseLeave={e => {
-                  if (!isActive(link.path)) {
-                    (e.currentTarget as HTMLButtonElement).style.color = 'var(--m-ink-3, #717070)';
-                    (e.currentTarget as HTMLButtonElement).style.background = 'transparent';
-                  }
-                }}
+                onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.color = INK; }}
+                onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.color = isActive(link.path) ? INK : INK3; }}
               >
                 {link.label}
               </button>
             ))}
           </nav>
 
-          {/* Right actions */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', marginLeft: 'auto', flexShrink: 0 }}>
+          {/* Right: search + theme + auth */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexShrink: 0 }}>
+            {/* Search */}
             <button
               onClick={onSearchOpen}
-              style={iconBtnStyle}
-              aria-label="Ara"
-              onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.background = 'rgba(13,13,13,0.06)'; (e.currentTarget as HTMLButtonElement).style.color = 'var(--m-ink, #0D0D0D)'; }}
-              onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.background = 'transparent'; (e.currentTarget as HTMLButtonElement).style.color = 'var(--m-ink-3, #717070)'; }}
+              style={{
+                display: 'flex', alignItems: 'center', gap: '0.4rem',
+                padding: '0.4rem 0.75rem', background: isDark ? 'rgba(255,255,255,0.06)' : '#f0ede8',
+                border: 'none', borderRadius: 8, cursor: 'pointer', color: INK3,
+                fontSize: '0.8rem', fontFamily: 'inherit', transition: 'background 0.15s',
+              }}
+              onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.background = isDark ? 'rgba(255,255,255,0.1)' : '#e8e4dc'; }}
+              onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.background = isDark ? 'rgba(255,255,255,0.06)' : '#f0ede8'; }}
             >
-              <Search size={17} />
+              <Search size={14} />
+              <span style={{ display: 'none' }} className="md-search-label">Ara...</span>
             </button>
 
+            {/* Theme toggle */}
             <button
               onClick={cycleTheme}
-              style={iconBtnStyle}
-              aria-label="Tema"
-              onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.background = 'rgba(13,13,13,0.06)'; (e.currentTarget as HTMLButtonElement).style.color = 'var(--m-ink, #0D0D0D)'; }}
-              onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.background = 'transparent'; (e.currentTarget as HTMLButtonElement).style.color = 'var(--m-ink-3, #717070)'; }}
+              style={{
+                width: 34, height: 34, borderRadius: 8, border: 'none', background: 'transparent',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                cursor: 'pointer', color: INK3, transition: 'background 0.15s',
+              }}
+              onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.background = isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.05)'; }}
+              onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.background = 'transparent'; }}
             >
-              <ThemeIcon size={16} />
+              <ThemeIcon size={15} />
             </button>
 
+            {/* Auth buttons */}
             {user ? (
               <button
                 onClick={() => navigate('profile')}
-                style={iconBtnStyle}
-                onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.background = 'rgba(13,13,13,0.06)'; (e.currentTarget as HTMLButtonElement).style.color = 'var(--m-ink, #0D0D0D)'; }}
-                onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.background = 'transparent'; (e.currentTarget as HTMLButtonElement).style.color = 'var(--m-ink-3, #717070)'; }}
+                style={{
+                  padding: '0.45rem 1rem', background: 'transparent',
+                  border: `1.5px solid ${isDark ? 'rgba(255,255,255,0.15)' : '#ddd'}`,
+                  borderRadius: 100, fontSize: '0.82rem', fontWeight: 600, color: INK,
+                  cursor: 'pointer', fontFamily: 'inherit', whiteSpace: 'nowrap',
+                  transition: 'border-color 0.15s',
+                }}
+                onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.borderColor = INK; }}
+                onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.borderColor = isDark ? 'rgba(255,255,255,0.15)' : '#ddd'; }}
               >
-                <UserCircle size={18} />
+                Profilim
               </button>
             ) : (
-              <button
-                onClick={() => navigate('login')}
-                style={{
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: '0.4rem',
-                  fontSize: '0.8rem',
-                  fontWeight: 600,
-                  color: 'var(--m-ink, #0D0D0D)',
-                  background: 'transparent',
-                  border: '1.5px solid var(--m-border-strong, #D1CEC6)',
-                  borderRadius: 8,
-                  padding: '0.4rem 0.875rem',
-                  cursor: 'pointer',
-                  fontFamily: 'inherit',
-                  whiteSpace: 'nowrap',
-                  transition: 'border-color 0.15s, background 0.15s',
-                }}
-                onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.borderColor = 'var(--m-ink, #0D0D0D)'; (e.currentTarget as HTMLButtonElement).style.background = 'rgba(13,13,13,0.04)'; }}
-                onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.borderColor = 'var(--m-border-strong, #D1CEC6)'; (e.currentTarget as HTMLButtonElement).style.background = 'transparent'; }}
-              >
-                <LogIn size={13} />
-                Giriş Yap
-              </button>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                <button
+                  onClick={() => navigate('login')}
+                  style={{
+                    padding: '0.45rem 1rem', background: 'transparent',
+                    border: `1.5px solid ${isDark ? 'rgba(255,255,255,0.15)' : '#ddd'}`,
+                    borderRadius: 100, fontSize: '0.82rem', fontWeight: 600, color: INK,
+                    cursor: 'pointer', fontFamily: 'inherit', whiteSpace: 'nowrap',
+                    transition: 'border-color 0.15s',
+                  }}
+                  onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.borderColor = '#999'; }}
+                  onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.borderColor = isDark ? 'rgba(255,255,255,0.15)' : '#ddd'; }}
+                >
+                  Giriş Yap
+                </button>
+                <button
+                  onClick={() => navigate('register')}
+                  style={{
+                    padding: '0.45rem 1rem', background: ORANGE, color: '#fff',
+                    border: 'none', borderRadius: 100,
+                    fontSize: '0.82rem', fontWeight: 700, cursor: 'pointer',
+                    fontFamily: 'inherit', whiteSpace: 'nowrap',
+                    boxShadow: '0 2px 10px rgba(249,115,22,0.3)',
+                    transition: 'filter 0.15s',
+                  }}
+                  onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.filter = 'brightness(1.1)'; }}
+                  onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.filter = 'none'; }}
+                >
+                  Yazar Ol
+                </button>
+              </div>
             )}
 
-            {/* Mobile menu toggle */}
+            {/* Mobile toggle */}
             <button
               onClick={() => setMobileOpen(v => !v)}
-              style={{ ...iconBtnStyle, display: 'none' }}
-              className="modern-header-mobile-toggle"
-              aria-label="Menü"
+              style={{
+                display: 'none', width: 34, height: 34, borderRadius: 8,
+                border: 'none', background: 'transparent', alignItems: 'center', justifyContent: 'center',
+                cursor: 'pointer', color: INK,
+              }}
+              className="modern-mobile-toggle"
             >
               {mobileOpen ? <X size={18} /> : <Menu size={18} />}
             </button>
@@ -232,42 +226,39 @@ export default function ModernHeader({
 
         {/* Mobile menu */}
         {mobileOpen && (
-          <div style={{
-            borderTop: '1px solid var(--m-border, #E8E5DF)',
-            background: 'var(--m-surface, #FFFFFF)',
-            padding: '0.75rem 2rem 1rem',
-          }}>
-            <nav style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
+          <div style={{ borderTop: `1px solid ${BORDER}`, background: isDark ? '#0C0C0C' : '#FAFAF6', padding: '0.75rem 2rem 1.25rem' }}>
+            <nav style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem', marginBottom: '1rem' }}>
               {navLinks.map(link => (
                 <button
-                  key={link.path}
+                  key={link.label}
                   onClick={() => { navigate(link.path); setMobileOpen(false); }}
                   style={{
-                    textAlign: 'left',
-                    fontSize: '0.9rem',
-                    fontWeight: isActive(link.path) ? 700 : 500,
-                    color: isActive(link.path) ? 'var(--m-ink, #0D0D0D)' : 'var(--m-ink-3, #717070)',
-                    background: isActive(link.path) ? 'rgba(13,13,13,0.06)' : 'transparent',
-                    border: 'none',
-                    borderRadius: 8,
-                    padding: '0.625rem 0.875rem',
-                    cursor: 'pointer',
-                    fontFamily: 'inherit',
-                    transition: 'background 0.15s, color 0.15s',
+                    textAlign: 'left', fontSize: '0.9rem', fontWeight: 600,
+                    color: isActive(link.path) ? INK : INK3,
+                    background: 'none', border: 'none', borderRadius: 8,
+                    padding: '0.625rem 0.875rem', cursor: 'pointer', fontFamily: 'inherit',
                   }}
                 >
                   {link.label}
                 </button>
               ))}
             </nav>
+            <div style={{ display: 'flex', gap: '0.5rem' }}>
+              <button onClick={() => { navigate('login'); setMobileOpen(false); }} style={{ flex: 1, padding: '0.625rem', background: 'transparent', border: `1.5px solid ${BORDER}`, borderRadius: 100, fontSize: '0.82rem', fontWeight: 600, color: INK, cursor: 'pointer', fontFamily: 'inherit' }}>Giriş Yap</button>
+              <button onClick={() => { navigate('register'); setMobileOpen(false); }} style={{ flex: 1, padding: '0.625rem', background: ORANGE, border: 'none', borderRadius: 100, fontSize: '0.82rem', fontWeight: 700, color: '#fff', cursor: 'pointer', fontFamily: 'inherit' }}>Yazar Ol</button>
+            </div>
           </div>
         )}
       </header>
 
       <style>{`
-        @media (max-width: 767px) {
-          .modern-header-mobile-toggle { display: inline-flex !important; }
-          .modern-header-mobile-toggle ~ button { display: none; }
+        @media (max-width: 768px) {
+          .modern-mobile-toggle { display: flex !important; }
+          nav { display: none !important; }
+          .md-search-label { display: none !important; }
+        }
+        @media (min-width: 769px) {
+          .md-search-label { display: inline !important; }
         }
       `}</style>
     </>
