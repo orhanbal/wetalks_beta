@@ -78,6 +78,7 @@ export default function App() {
   useEffect(() => {
     const style = settings['site_style'] ?? 'classic';
     document.documentElement.setAttribute('data-site-style', style);
+    document.body.setAttribute('data-site-style', style);
     localStorage.setItem('site-style', style);
   }, [settings['site_style']]);
 
