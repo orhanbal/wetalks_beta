@@ -17,25 +17,27 @@ interface ModernHeaderProps {
 }
 
 const GRAD_PURPLE_PINK = 'linear-gradient(135deg, #8B5CF6, #EC4899)';
-const PURPLE = '#8B5CF6';
 
-function useDarkTheme() {
+/* Reads data-theme purely from CSS cascade — no JS state race condition */
+function useIsDark() {
   const [isDark, setIsDark] = useState(() => {
     const attr = document.documentElement.getAttribute('data-theme');
     if (attr) return attr === 'dark';
-    const stored = localStorage.getItem('theme-pref') as 'system' | 'light' | 'dark' | null;
+    const stored = localStorage.getItem('theme-pref');
     if (stored === 'dark') return true;
     if (stored === 'light') return false;
     return window.matchMedia('(prefers-color-scheme: dark)').matches;
   });
+
   useEffect(() => {
-    const update = () =>
+    const sync = () =>
       setIsDark(document.documentElement.getAttribute('data-theme') === 'dark');
-    update();
-    const obs = new MutationObserver(update);
+    sync();
+    const obs = new MutationObserver(sync);
     obs.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
     return () => obs.disconnect();
   }, []);
+
   return isDark;
 }
 
@@ -56,10 +58,11 @@ export default function ModernHeader({
   const { preference, setPreference } = useDarkMode(siteDefault);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
-  const isDark = useDarkTheme();
+  const isDark = useIsDark();
 
   useEffect(() => {
     const fn = () => setScrolled(window.scrollY > 12);
+    fn();
     window.addEventListener('scroll', fn, { passive: true });
     return () => window.removeEventListener('scroll', fn);
   }, []);
@@ -74,28 +77,11 @@ export default function ModernHeader({
   const navLinks = [...NAV_LINKS, ...(showPollsPage ? [{ label: 'Anketler', path: 'polls' }] : [])];
   const isActive = (path: string) => currentPage === path || (path === 'discover' && currentPage === '');
 
-  const bgBase = isDark ? 'rgba(3,7,18,0)' : 'rgba(248,247,244,0)';
-  const bgScrolled = isDark
-    ? 'rgba(5,11,21,0.85)'
-    : 'rgba(255,255,255,0.85)';
-  const borderScrolled = isDark
-    ? 'rgba(255,255,255,0.07)'
-    : 'rgba(17,24,39,0.07)';
-  const INK = isDark ? '#fff' : '#111827';
-  const INK3 = isDark ? '#71717A' : '#6B7280';
-  const SRCH_BG = isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.05)';
-  const SRCH_BORDER = isDark ? 'rgba(255,255,255,0.10)' : 'rgba(0,0,0,0.10)';
-  const BTN1_BORDER = isDark ? 'rgba(255,255,255,0.15)' : 'rgba(0,0,0,0.12)';
-
   return (
     <>
-      <header style={{
+      {/* Header uses CSS classes — no inline background/color that depends on isDark */}
+      <header className={`navbar${scrolled ? ' navbar--scrolled' : ''}`} style={{
         position: 'sticky', top: 0, zIndex: 100,
-        background: scrolled ? bgScrolled : bgBase,
-        backdropFilter: scrolled ? 'blur(20px) saturate(180%)' : 'none',
-        WebkitBackdropFilter: scrolled ? 'blur(20px) saturate(180%)' : 'none',
-        borderBottom: scrolled ? `1px solid ${borderScrolled}` : '1px solid transparent',
-        transition: 'background 0.3s, border-color 0.3s',
       }}>
         <div style={{ maxWidth: 1200, margin: '0 auto', padding: '0 2rem', height: 72, display: 'flex', alignItems: 'center', gap: '2rem' }}>
 
@@ -107,28 +93,20 @@ export default function ModernHeader({
             {activeLogo ? (
               <img src={activeLogo} alt={siteTitle} style={{ height: 26, objectFit: 'contain' }} />
             ) : (
-              <span style={{ fontSize: '1.2rem', fontWeight: 900, letterSpacing: '-0.04em', color: INK, fontFamily: 'inherit', lineHeight: 1 }}>
+              <span className="modern-logo-text">
                 {siteTitle}
                 <span style={{ background: GRAD_PURPLE_PINK, WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>.</span>
               </span>
             )}
           </button>
 
-          {/* Desktop nav */}
-          <nav className="modern-nav" style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.25rem' }}>
+          {/* Desktop nav — colors fully controlled by CSS */}
+          <nav className="modern-nav" style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 0 }}>
             {navLinks.map(link => (
               <button
                 key={link.label}
                 onClick={() => navigate(link.path)}
-                style={{
-                  background: 'none', border: 'none', borderRadius: 8,
-                  padding: '0.4rem 0.875rem', cursor: 'pointer', fontFamily: 'inherit',
-                  fontSize: '0.875rem', fontWeight: isActive(link.path) ? 600 : 400,
-                  color: isActive(link.path) ? INK : INK3,
-                  transition: 'color 0.15s', whiteSpace: 'nowrap',
-                }}
-                onMouseEnter={e => (e.currentTarget.style.color = INK)}
-                onMouseLeave={e => (e.currentTarget.style.color = isActive(link.path) ? INK : INK3)}
+                className={`modern-nav-btn${isActive(link.path) ? ' modern-nav-btn--active' : ''}`}
               >
                 {link.label}
               </button>
@@ -138,66 +116,24 @@ export default function ModernHeader({
           {/* Right controls */}
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexShrink: 0 }}>
             {/* Search */}
-            <button
-              onClick={onSearchOpen}
-              style={{
-                display: 'flex', alignItems: 'center', gap: '0.5rem',
-                padding: '0.45rem 0.875rem', height: 38,
-                background: SRCH_BG, border: `1px solid ${SRCH_BORDER}`,
-                borderRadius: 100, cursor: 'pointer', color: INK3,
-                fontSize: '0.8rem', fontFamily: 'inherit', transition: 'background 0.15s, border-color 0.15s',
-              }}
-              onMouseEnter={e => { e.currentTarget.style.background = isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.08)'; e.currentTarget.style.borderColor = isDark ? 'rgba(255,255,255,0.18)' : 'rgba(0,0,0,0.16)'; }}
-              onMouseLeave={e => { e.currentTarget.style.background = SRCH_BG; e.currentTarget.style.borderColor = SRCH_BORDER; }}
-            >
+            <button onClick={onSearchOpen} className="modern-search-btn">
               <Search size={14} />
-              <span className="modern-search-label" style={{ color: INK3 }}>Ara...</span>
+              <span className="modern-search-label">Ara...</span>
             </button>
 
             {/* Theme toggle */}
-            <button
-              onClick={cycleTheme}
-              style={{
-                width: 36, height: 36, borderRadius: 10, border: 'none', background: 'transparent',
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                cursor: 'pointer', color: INK3, transition: 'background 0.15s',
-              }}
-              onMouseEnter={e => (e.currentTarget.style.background = isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.05)')}
-              onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
-            >
+            <button onClick={cycleTheme} className="modern-theme-btn">
               <ThemeIcon size={15} />
             </button>
 
             {/* Auth */}
             {user ? (
-              <button
-                onClick={() => navigate('profile')}
-                style={{
-                  height: 38, padding: '0 1.1rem', background: 'transparent',
-                  border: `1px solid ${BTN1_BORDER}`, borderRadius: 10,
-                  fontSize: '0.82rem', fontWeight: 500, color: INK,
-                  cursor: 'pointer', fontFamily: 'inherit', whiteSpace: 'nowrap',
-                  transition: 'border-color 0.15s',
-                }}
-                onMouseEnter={e => (e.currentTarget.style.borderColor = isDark ? 'rgba(255,255,255,0.3)' : 'rgba(0,0,0,0.2)')}
-                onMouseLeave={e => (e.currentTarget.style.borderColor = BTN1_BORDER)}
-              >
+              <button onClick={() => navigate('profile')} className="modern-login-btn">
                 Profilim
               </button>
             ) : (
               <>
-                <button
-                  onClick={() => navigate('login')}
-                  style={{
-                    height: 38, padding: '0 1.1rem', background: 'transparent',
-                    border: `1px solid ${BTN1_BORDER}`, borderRadius: 10,
-                    fontSize: '0.82rem', fontWeight: 500, color: INK,
-                    cursor: 'pointer', fontFamily: 'inherit', whiteSpace: 'nowrap',
-                    transition: 'border-color 0.15s',
-                  }}
-                  onMouseEnter={e => (e.currentTarget.style.borderColor = isDark ? 'rgba(255,255,255,0.3)' : 'rgba(0,0,0,0.2)')}
-                  onMouseLeave={e => (e.currentTarget.style.borderColor = BTN1_BORDER)}
-                >
+                <button onClick={() => navigate('login')} className="modern-login-btn">
                   Giriş Yap
                 </button>
                 <button
@@ -222,13 +158,8 @@ export default function ModernHeader({
             {/* Mobile toggle */}
             <button
               onClick={() => setMobileOpen(v => !v)}
-              className="modern-hamburger"
-              style={{
-                display: 'none', width: 36, height: 36, borderRadius: 10,
-                border: `1px solid ${BTN1_BORDER}`, background: 'transparent',
-                alignItems: 'center', justifyContent: 'center',
-                cursor: 'pointer', color: INK,
-              }}
+              className="modern-hamburger modern-login-btn"
+              style={{ display: 'none', width: 36, padding: 0, alignItems: 'center', justifyContent: 'center' }}
             >
               {mobileOpen ? <X size={17} /> : <Menu size={17} />}
             </button>
@@ -237,34 +168,21 @@ export default function ModernHeader({
 
         {/* Mobile drawer */}
         {mobileOpen && (
-          <div style={{
-            borderTop: `1px solid ${borderScrolled}`,
-            background: isDark ? '#050B15' : '#fff',
-            padding: '0.875rem 2rem 1.5rem',
-          }}>
+          <div className="modern-mobile-drawer">
             <nav style={{ display: 'flex', flexDirection: 'column', gap: '0.125rem', marginBottom: '1rem' }}>
               {navLinks.map(link => (
                 <button
                   key={link.label}
                   onClick={() => { navigate(link.path); setMobileOpen(false); }}
-                  style={{
-                    textAlign: 'left', fontSize: '0.9rem', fontWeight: 500, color: INK3,
-                    background: 'none', border: 'none', borderRadius: 8,
-                    padding: '0.625rem 0.5rem', cursor: 'pointer', fontFamily: 'inherit',
-                    transition: 'color 0.15s',
-                  }}
-                  onMouseEnter={e => (e.currentTarget.style.color = INK)}
-                  onMouseLeave={e => (e.currentTarget.style.color = INK3)}
+                  className={`modern-nav-btn${isActive(link.path) ? ' modern-nav-btn--active' : ''}`}
+                  style={{ textAlign: 'left', padding: '0.625rem 0.5rem' }}
                 >
                   {link.label}
                 </button>
               ))}
             </nav>
             <div style={{ display: 'flex', gap: '0.5rem' }}>
-              <button
-                onClick={() => { navigate('login'); setMobileOpen(false); }}
-                style={{ flex: 1, height: 42, background: 'transparent', border: `1px solid ${BTN1_BORDER}`, borderRadius: 10, fontSize: '0.85rem', fontWeight: 500, color: INK, cursor: 'pointer', fontFamily: 'inherit' }}
-              >
+              <button onClick={() => { navigate('login'); setMobileOpen(false); }} className="modern-login-btn" style={{ flex: 1, height: 42 }}>
                 Giriş Yap
               </button>
               <button

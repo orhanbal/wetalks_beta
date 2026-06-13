@@ -109,15 +109,146 @@
 }
 
 [data-site-style="modern"] .navbar--scrolled {
-  background: rgba(249, 248, 246, 0.88);
-  backdrop-filter: blur(18px) saturate(180%);
-  -webkit-backdrop-filter: blur(18px) saturate(180%);
-  border-bottom: 1px solid var(--m-border);
-  box-shadow: 0 1px 0 var(--m-border);
+  background: rgba(248, 247, 244, 0.90);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border-bottom: 1px solid rgba(0,0,0,0.07);
 }
 
 [data-site-style="modern"][data-theme="dark"] .navbar--scrolled {
-  background: rgba(12, 12, 12, 0.88);
+  background: rgba(5, 11, 21, 0.90);
+  border-bottom: 1px solid rgba(255,255,255,0.07);
+}
+
+/* Nav link colors — CSS cascade, no JS state needed */
+[data-site-style="modern"] .modern-nav-btn {
+  color: #6B7280;
+  font-weight: 400;
+  font-size: 0.875rem;
+  background: none;
+  border: none;
+  padding: 0.4rem 0.875rem;
+  border-radius: 8px;
+  cursor: pointer;
+  font-family: inherit;
+  white-space: nowrap;
+  transition: color 0.15s;
+}
+[data-site-style="modern"] .modern-nav-btn:hover,
+[data-site-style="modern"] .modern-nav-btn--active {
+  color: #111827;
+  font-weight: 600;
+}
+[data-site-style="modern"][data-theme="dark"] .modern-nav-btn {
+  color: #71717A;
+}
+[data-site-style="modern"][data-theme="dark"] .modern-nav-btn:hover,
+[data-site-style="modern"][data-theme="dark"] .modern-nav-btn--active {
+  color: #FFFFFF;
+}
+
+/* Logo text */
+[data-site-style="modern"] .modern-logo-text {
+  font-size: 1.2rem;
+  font-weight: 900;
+  letter-spacing: -0.04em;
+  color: #111827;
+  font-family: inherit;
+  line-height: 1;
+}
+[data-site-style="modern"][data-theme="dark"] .modern-logo-text {
+  color: #FFFFFF;
+}
+
+/* Search button */
+[data-site-style="modern"] .modern-search-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.45rem 0.875rem;
+  height: 38px;
+  background: rgba(0,0,0,0.05);
+  border: 1px solid rgba(0,0,0,0.10);
+  border-radius: 100px;
+  cursor: pointer;
+  color: #6B7280;
+  font-size: 0.8rem;
+  font-family: inherit;
+  transition: background 0.15s, border-color 0.15s;
+}
+[data-site-style="modern"] .modern-search-btn:hover {
+  background: rgba(0,0,0,0.08);
+  border-color: rgba(0,0,0,0.16);
+}
+[data-site-style="modern"][data-theme="dark"] .modern-search-btn {
+  background: rgba(255,255,255,0.06);
+  border-color: rgba(255,255,255,0.10);
+  color: #71717A;
+}
+[data-site-style="modern"][data-theme="dark"] .modern-search-btn:hover {
+  background: rgba(255,255,255,0.10);
+  border-color: rgba(255,255,255,0.18);
+}
+
+/* Giriş Yap outlined button */
+[data-site-style="modern"] .modern-login-btn {
+  height: 38px;
+  padding: 0 1.1rem;
+  background: transparent;
+  border: 1px solid rgba(0,0,0,0.12);
+  border-radius: 10px;
+  font-size: 0.82rem;
+  font-weight: 500;
+  color: #111827;
+  cursor: pointer;
+  font-family: inherit;
+  white-space: nowrap;
+  transition: border-color 0.15s;
+}
+[data-site-style="modern"] .modern-login-btn:hover {
+  border-color: rgba(0,0,0,0.25);
+}
+[data-site-style="modern"][data-theme="dark"] .modern-login-btn {
+  border-color: rgba(255,255,255,0.15);
+  color: #FFFFFF;
+}
+[data-site-style="modern"][data-theme="dark"] .modern-login-btn:hover {
+  border-color: rgba(255,255,255,0.30);
+}
+
+/* Theme toggle */
+[data-site-style="modern"] .modern-theme-btn {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  border: none;
+  background: transparent;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: #6B7280;
+  transition: background 0.15s;
+}
+[data-site-style="modern"] .modern-theme-btn:hover {
+  background: rgba(0,0,0,0.05);
+}
+[data-site-style="modern"][data-theme="dark"] .modern-theme-btn {
+  color: #71717A;
+}
+[data-site-style="modern"][data-theme="dark"] .modern-theme-btn:hover {
+  background: rgba(255,255,255,0.08);
+}
+
+/* Mobile drawer */
+[data-site-style="modern"] .modern-mobile-drawer {
+  border-top: 1px solid rgba(0,0,0,0.07);
+  background: rgba(248,247,244,0.98);
+  padding: 0.875rem 2rem 1.5rem;
+}
+[data-site-style="modern"][data-theme="dark"] .modern-mobile-drawer {
+  border-top-color: rgba(255,255,255,0.07);
+  background: rgba(5,11,21,0.98);
 }
 
 [data-site-style="modern"] .navbar-logo {
