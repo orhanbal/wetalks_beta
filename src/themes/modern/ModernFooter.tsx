@@ -1,9 +1,5 @@
 import { useState } from 'react';
-import { ArrowRight, Check, Linkedin, Mail } from 'lucide-react';
-import { Button } from '../../components/ui/button';
-import { Input } from '../../components/ui/input';
-import { Separator } from '../../components/ui/separator';
-import { cn } from '../../lib/utils';
+import { ArrowRight, Check, Mail } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 
 interface ModernFooterProps {
@@ -11,7 +7,7 @@ interface ModernFooterProps {
   settings?: Record<string, string>;
 }
 
-const NAV_LINKS = [
+const NAV_GROUPS = [
   { group: 'İçerik', links: [
     { label: 'Anasayfa', path: '' },
     { label: 'Tüm Yazılar', path: 'contents' },
@@ -46,27 +42,68 @@ function NewsletterForm() {
 
   if (status === 'success') {
     return (
-      <div className="flex items-center gap-2 text-sm text-emerald-600">
-        <Check size={15} />
+      <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.82rem', color: '#86efac', marginTop: '0.75rem' }}>
+        <Check size={14} />
         Bülten listemize eklendiniz.
       </div>
     );
   }
 
+  if (status === 'duplicate') {
+    return (
+      <p style={{ fontSize: '0.82rem', color: 'rgba(240,237,232,0.5)', marginTop: '0.75rem' }}>
+        Bu e-posta zaten kayıtlı.
+      </p>
+    );
+  }
+
   return (
-    <form onSubmit={handleSubmit} className="flex gap-2 mt-3">
-      <Input
+    <form onSubmit={handleSubmit} style={{ display: 'flex', gap: '0.5rem', marginTop: '0.75rem' }}>
+      <input
         type="email"
         placeholder="E-posta adresiniz"
         value={email}
         onChange={e => setEmail(e.target.value)}
         required
         disabled={status === 'loading'}
-        className="h-9 text-sm"
+        style={{
+          flex: 1,
+          minWidth: 0,
+          height: 36,
+          padding: '0 0.75rem',
+          background: 'rgba(255,255,255,0.06)',
+          border: '1px solid rgba(255,255,255,0.12)',
+          borderRadius: 8,
+          color: '#F0EDE8',
+          fontSize: '0.82rem',
+          fontFamily: 'inherit',
+          outline: 'none',
+          transition: 'border-color 0.15s',
+        }}
+        onFocus={e => (e.currentTarget.style.borderColor = 'rgba(255,255,255,0.35)')}
+        onBlur={e => (e.currentTarget.style.borderColor = 'rgba(255,255,255,0.12)')}
       />
-      <Button type="submit" size="sm" disabled={status === 'loading' || !email.trim()} className="shrink-0">
+      <button
+        type="submit"
+        disabled={status === 'loading' || !email.trim()}
+        style={{
+          height: 36,
+          width: 36,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          flexShrink: 0,
+          background: '#F0EDE8',
+          border: 'none',
+          borderRadius: 8,
+          color: '#0D0D0D',
+          cursor: 'pointer',
+          transition: 'opacity 0.15s',
+          opacity: status === 'loading' || !email.trim() ? 0.4 : 1,
+        }}
+      >
         <ArrowRight size={15} />
-      </Button>
+      </button>
     </form>
   );
 }
@@ -75,72 +112,127 @@ export default function ModernFooter({ navigate, settings = {} }: ModernFooterPr
   const siteTitle = settings['site_title'] || 'Site';
   const logoUrl = settings['logo_url'] || '';
   const tagline = settings['footer_tagline'] || '';
-  const copyright = settings['footer_copyright'] || `© ${new Date().getFullYear()} ${siteTitle}`;
-  const linkedinUrl = settings['linkedin_url'] || '';
+  const copyright = settings['footer_copyright'] || `© ${new Date().getFullYear()} ${siteTitle}. Tüm hakları saklıdır.`;
+  const siteDomain = settings['site_domain'] || '';
+
+  const linkStyle: React.CSSProperties = {
+    display: 'block',
+    fontSize: '0.825rem',
+    color: 'rgba(240,237,232,0.5)',
+    background: 'none',
+    border: 'none',
+    padding: '0.275rem 0',
+    cursor: 'pointer',
+    fontFamily: 'inherit',
+    textAlign: 'left',
+    transition: 'color 0.15s',
+  };
 
   return (
-    <footer className="border-t bg-background mt-16">
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-12">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-10">
+    <footer style={{
+      background: '#0D0D0D',
+      color: 'rgba(240,237,232,0.85)',
+      marginTop: 0,
+      borderTop: 'none',
+    }}>
+      <div style={{ maxWidth: 1200, margin: '0 auto', padding: '4rem 2rem 2.5rem' }}>
+        {/* Top row */}
+        <div style={{ display: 'grid', gridTemplateColumns: '1.8fr 1fr 1fr 1.5fr', gap: '3rem', marginBottom: '3rem' }}>
+
           {/* Brand */}
-          <div className="md:col-span-1">
-            <button onClick={() => navigate('')} className="focus-visible:outline-none">
+          <div>
+            <button
+              onClick={() => navigate('')}
+              style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0, marginBottom: '1rem', display: 'block' }}
+            >
               {logoUrl ? (
-                <img src={logoUrl} alt={siteTitle} className="h-7 object-contain mb-3" />
+                <img src={logoUrl} alt={siteTitle} style={{ height: 28, objectFit: 'contain', filter: 'brightness(0) invert(1)' }} />
               ) : (
-                <span className="font-bold text-base text-foreground">{siteTitle}</span>
+                <span style={{
+                  fontSize: '1.25rem',
+                  fontWeight: 900,
+                  letterSpacing: '-0.04em',
+                  color: '#F0EDE8',
+                  fontFamily: 'inherit',
+                  lineHeight: 1,
+                }}>
+                  {siteTitle}
+                </span>
               )}
             </button>
-            {tagline && <p className="mt-2 text-sm text-muted-foreground leading-relaxed">{tagline}</p>}
-            <div className="flex items-center gap-2 mt-4">
-              {linkedinUrl && (
-                <a
-                  href={linkedinUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center justify-center w-8 h-8 rounded-md border border-border text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors"
-                >
-                  <Linkedin size={14} />
-                </a>
-              )}
-            </div>
+            {tagline && (
+              <p style={{
+                fontSize: '0.875rem',
+                color: 'rgba(240,237,232,0.48)',
+                lineHeight: 1.75,
+                maxWidth: 280,
+                margin: 0,
+              }}>
+                {tagline}
+              </p>
+            )}
           </div>
 
           {/* Nav groups */}
-          {NAV_LINKS.map(group => (
+          {NAV_GROUPS.map(group => (
             <div key={group.group}>
-              <h4 className="text-sm font-semibold text-foreground mb-3">{group.group}</h4>
-              <ul className="space-y-2">
+              <h4 style={{
+                fontSize: '0.65rem',
+                fontWeight: 700,
+                letterSpacing: '0.1em',
+                textTransform: 'uppercase',
+                color: 'rgba(240,237,232,0.3)',
+                marginBottom: '1rem',
+              }}>
+                {group.group}
+              </h4>
+              <div style={{ display: 'flex', flexDirection: 'column' }}>
                 {group.links.map(link => (
-                  <li key={link.path}>
-                    <button
-                      onClick={() => navigate(link.path)}
-                      className="text-sm text-muted-foreground hover:text-foreground transition-colors"
-                    >
-                      {link.label}
-                    </button>
-                  </li>
+                  <button
+                    key={link.path}
+                    onClick={() => navigate(link.path)}
+                    style={linkStyle}
+                    onMouseEnter={e => (e.currentTarget.style.color = '#F0EDE8')}
+                    onMouseLeave={e => (e.currentTarget.style.color = 'rgba(240,237,232,0.5)')}
+                  >
+                    {link.label}
+                  </button>
                 ))}
-              </ul>
+              </div>
             </div>
           ))}
 
           {/* Newsletter */}
           <div>
-            <div className="flex items-center gap-2 mb-1">
-              <Mail size={14} className="text-muted-foreground" />
-              <h4 className="text-sm font-semibold text-foreground">Haftalık Bülten</h4>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.5rem' }}>
+              <Mail size={13} style={{ color: 'rgba(240,237,232,0.4)', flexShrink: 0 }} />
+              <h4 style={{
+                fontSize: '0.65rem',
+                fontWeight: 700,
+                letterSpacing: '0.1em',
+                textTransform: 'uppercase',
+                color: 'rgba(240,237,232,0.3)',
+                margin: 0,
+              }}>
+                Haftalık Bülten
+              </h4>
             </div>
-            <p className="text-sm text-muted-foreground">Yeni yazıları e-postanıza alın.</p>
+            <p style={{ fontSize: '0.825rem', color: 'rgba(240,237,232,0.48)', margin: 0, lineHeight: 1.6 }}>
+              Yeni yazıları e-postanıza alın.
+            </p>
             <NewsletterForm />
           </div>
         </div>
 
-        <Separator className="my-8" />
+        {/* Divider */}
+        <div style={{ height: 1, background: 'rgba(255,255,255,0.07)', marginBottom: '1.75rem' }} />
 
-        <div className="flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-muted-foreground">
-          <span>{copyright}</span>
-          <span>{settings['site_domain'] || ''}</span>
+        {/* Bottom row */}
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '1rem', flexWrap: 'wrap' }}>
+          <span style={{ fontSize: '0.75rem', color: 'rgba(240,237,232,0.28)' }}>{copyright}</span>
+          {siteDomain && (
+            <span style={{ fontSize: '0.75rem', color: 'rgba(240,237,232,0.28)', letterSpacing: '0.03em' }}>{siteDomain}</span>
+          )}
         </div>
       </div>
     </footer>
