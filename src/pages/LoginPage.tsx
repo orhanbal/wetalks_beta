@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { supabase } from '../lib/supabase';
+import { signInWithEmail } from '../lib/auth';
 import { Eye, EyeOff, ArrowLeft } from 'lucide-react';
 
 interface LoginPageProps {
@@ -18,14 +18,18 @@ export default function LoginPage({ navigate }: LoginPageProps) {
     setError('');
     setLoading(true);
 
-    const { error: authError } = await supabase.auth.signInWithPassword({ email, password });
-
-    if (authError) {
-      setError('E-posta veya şifre hatalı. Lütfen tekrar deneyin.');
-    } else {
-      navigate('');
+    try {
+      const response = await signInWithEmail(email, password);
+      if (response.status === 'OK') {
+        navigate('');
+      } else {
+        setError('E-posta veya şifre hatalı. Lütfen tekrar deneyin.');
+      }
+    } catch {
+      setError('Giriş sırasında bir hata oluştu. Lütfen tekrar deneyin.');
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
 
   return (
