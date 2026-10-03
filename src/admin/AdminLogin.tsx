@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { supabase } from '../lib/supabase';
+import { signInWithEmail } from '../lib/auth';
 
 interface AdminLoginProps {
   onLogin: () => void;
@@ -15,14 +15,18 @@ export default function AdminLogin({ onLogin }: AdminLoginProps) {
     e.preventDefault();
     setError('');
     setLoading(true);
-    const { data: authData, error: authError } = await supabase.auth.signInWithPassword({ email, password });
-    console.log('Auth result:', authData, authError);
-    if (authError) {
-      setError(`${authError.message} (${authError.status ?? 'no status'})`);
-    } else {
-      onLogin();
+    try {
+      const response = await signInWithEmail(email, password);
+      if (response.status === 'OK') {
+        onLogin();
+      } else {
+        setError('E-posta veya şifre hatalı.');
+      }
+    } catch {
+      setError('Giriş sırasında bir hata oluştu.');
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
 
   return (
