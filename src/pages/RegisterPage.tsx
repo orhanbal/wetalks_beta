@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { supabase } from '../lib/supabase';
+import { getCurrentUser, signOutUser, signUpWithEmail } from '../lib/auth';
 import { Eye, EyeOff, ArrowLeft } from 'lucide-react';
 
 interface RegisterPageProps {
@@ -26,25 +27,46 @@ export default function RegisterPage({ navigate }: RegisterPageProps) {
 
     setLoading(true);
 
-    const { error: authError } = await supabase.auth.signUp({
-      email,
-      password,
-      options: {
-        data: { full_name: fullName, app: 'wetalks' },
-      },
-    });
+    try {
+      const response = await signUpWithEmail(email, password);
 
-    if (authError) {
-      if (authError.message.includes('already registered')) {
+      if (response.status !== 'OK') {
+        const fieldMessage =
+          response.status === 'FIELD_ERROR'
+            ? response.formFields?.[0]?.error
+            : undefined;
+        setError(fieldMessage || 'Kayıt sırasında bir hata oluştu. Lütfen tekrar deneyin.');
+        return;
+      }
+
+      const user = await getCurrentUser();
+      if (!user) {
+        throw new Error('AUTH_USER_NOT_AVAILABLE');
+      }
+
+      const { error: profileError } = await supabase
+        .from('profiles')
+        .insert({
+          id: user.id,
+          full_name: fullName.trim(),
+        });
+
+      if (profileError && !String(profileError.message || '').toLowerCase().includes('duplicate')) {
+        throw profileError;
+      }
+
+      await signOutUser();
+      setSuccess(true);
+    } catch (err: any) {
+      const message = String(err?.message || '').toLowerCase();
+      if (message.includes('already') || message.includes('email already')) {
         setError('Bu e-posta adresi zaten kayıtlı. Giriş yapmayı deneyin.');
       } else {
         setError('Kayıt sırasında bir hata oluştu. Lütfen tekrar deneyin.');
       }
-    } else {
-      setSuccess(true);
+    } finally {
+      setLoading(false);
     }
-
-    setLoading(false);
   };
 
   if (success) {
