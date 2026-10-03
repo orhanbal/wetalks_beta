@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { supabase } from '../lib/supabase';
+import { deleteAvatar, uploadAvatar } from '../lib/storage';
 import { useAuth } from '../hooks/useAuth';
 import { Camera, Save, ArrowLeft, Trash2, Send, Clock, CheckCircle, XCircle, Bookmark, BookOpen, FileText, User, Globe, Twitter, Instagram, Linkedin, Eye, PenLine, ChevronRight, ExternalLink, CreditCard as Edit2, X, Users, Shield, Star, Crown, FolderPlus, Folder, StickyNote, Check, Plus, Pencil } from 'lucide-react';
 import AvatarCrop from '../components/AvatarCrop';
@@ -209,24 +210,30 @@ export default function ProfilePage({ navigate, articles, seriesList }: ProfileP
     setCropFile(null);
     setUploading(true);
     setUploadError('');
-    const filePath = `${user.id}/avatar.webp`;
-    const { error: uploadErr } = await supabase.storage.from('avatars').upload(filePath, blob, { contentType: 'image/webp', upsert: true });
-    if (uploadErr) { setUploadError('Resim yüklenemedi.'); setUploading(false); return; }
-    const { data: { publicUrl } } = supabase.storage.from('avatars').getPublicUrl(filePath);
-    const urlWithCache = `${publicUrl}?t=${Date.now()}`;
-    await supabase.from('profiles').update({ avatar_url: publicUrl, updated_at: new Date().toISOString() }).eq('id', user.id);
-    setProfile(p => p ? { ...p, avatar_url: urlWithCache } : p);
-    window.dispatchEvent(new Event('profile-avatar-updated'));
-    setUploading(false);
+    try {
+      const { publicUrl } = await uploadAvatar(blob);
+      const urlWithCache = `${publicUrl}?t=${Date.now()}`;
+      await supabase.from('profiles').update({ avatar_url: publicUrl, updated_at: new Date().toISOString() }).eq('id', user.id);
+      setProfile(p => p ? { ...p, avatar_url: urlWithCache } : p);
+      window.dispatchEvent(new Event('profile-avatar-updated'));
+    } catch {
+      setUploadError('Resim yüklenemedi.');
+    } finally {
+      setUploading(false);
+    }
   };
 
   const handleRemoveAvatar = async () => {
     if (!user || !profile?.avatar_url) return;
     setUploading(true);
-    await supabase.from('profiles').update({ avatar_url: null, updated_at: new Date().toISOString() }).eq('id', user.id);
-    setProfile(p => p ? { ...p, avatar_url: null } : p);
-    window.dispatchEvent(new Event('profile-avatar-updated'));
-    setUploading(false);
+    try {
+      await deleteAvatar().catch(() => undefined);
+      await supabase.from('profiles').update({ avatar_url: null, updated_at: new Date().toISOString() }).eq('id', user.id);
+      setProfile(p => p ? { ...p, avatar_url: null } : p);
+      window.dispatchEvent(new Event('profile-avatar-updated'));
+    } finally {
+      setUploading(false);
+    }
   };
 
   const handleRoleRequest = async (e: React.FormEvent) => {
