@@ -1,29 +1,40 @@
 import { useState, useEffect } from 'react';
-import type { Session, User } from '@supabase/supabase-js';
-import { supabase } from '../lib/supabase';
+import { AuthUser, getCurrentUser } from '../lib/auth';
+
+export interface AuthSession {
+  user: AuthUser;
+}
 
 export interface AuthState {
-  session: Session | null;
-  user: User | null;
+  session: AuthSession | null;
+  user: AuthUser | null;
   loading: boolean;
 }
 
 export function useAuth(): AuthState {
-  const [session, setSession] = useState<Session | null>(null);
+  const [session, setSession] = useState<AuthSession | null>(null);
+  const [user, setUser] = useState<AuthUser | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data }) => {
-      setSession(data.session);
+    let active = true;
+
+    const sync = async () => {
+      const current = await getCurrentUser().catch(() => null);
+      if (!active) return;
+      setUser(current);
+      setSession(current ? { user: current } : null);
       setLoading(false);
-    });
+    };
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, s) => {
-      setSession(s);
-    });
+    void sync();
+    window.addEventListener('webrising-auth-changed', sync);
 
-    return () => subscription.unsubscribe();
+    return () => {
+      active = false;
+      window.removeEventListener('webrising-auth-changed', sync);
+    };
   }, []);
 
-  return { session, user: session?.user ?? null, loading };
+  return { session, user, loading };
 }
