@@ -9,6 +9,10 @@ export const AUTH_API_DOMAIN =
 export interface AuthUser {
   id: string;
   email: string | null;
+  user_metadata: {
+    full_name?: string | null;
+    display_name?: string | null;
+  };
 }
 
 let initialized = false;
@@ -53,6 +57,7 @@ export async function getCurrentUser(): Promise<AuthUser | null> {
   return {
     id: String(user.id || ''),
     email: user.email || null,
+    user_metadata: {},
   };
 }
 
