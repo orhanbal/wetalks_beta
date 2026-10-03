@@ -1,7 +1,10 @@
 import { createClient } from '@supabase/supabase-js';
 
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL as string;
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY as string;
+const supabaseUrl =
+  typeof window !== 'undefined' && window.location?.origin
+    ? window.location.origin
+    : 'http://localhost';
+const supabaseAnonKey = 'wetalks-public-proxy';
 
 export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
   db: { schema: 'wetalks' }
