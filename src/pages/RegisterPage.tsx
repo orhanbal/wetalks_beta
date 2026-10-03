@@ -30,7 +30,7 @@ export default function RegisterPage({ navigate }: RegisterPageProps) {
       email,
       password,
       options: {
-        data: { full_name: fullName },
+        data: { full_name: fullName, app: 'wetalks' },
       },
     });
 
