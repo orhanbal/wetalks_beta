@@ -1,4 +1,7 @@
 import { createClient } from '@supabase/supabase-js';
+import { ensureAuth, getPostgrestToken } from './auth';
+
+ensureAuth();
 
 const supabaseUrl =
   typeof window !== 'undefined' && window.location?.origin
@@ -6,8 +9,31 @@ const supabaseUrl =
     : 'http://localhost';
 const supabaseAnonKey = 'wetalks-public-proxy';
 
+const authAwareFetch: typeof fetch = async (input, init = {}) => {
+  const headers = new Headers(input instanceof Request ? input.headers : undefined);
+  new Headers(init.headers || undefined).forEach((value, key) => headers.set(key, value));
+
+  const token = await getPostgrestToken().catch(() => null);
+  if (token) {
+    headers.set('Authorization', `Bearer ${token}`);
+  }
+
+  return fetch(input, {
+    ...init,
+    headers,
+  });
+};
+
 export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
-  db: { schema: 'wetalks' }
+  db: { schema: 'wetalks' },
+  auth: {
+    persistSession: false,
+    autoRefreshToken: false,
+    detectSessionInUrl: false,
+  },
+  global: {
+    fetch: authAwareFetch,
+  },
 });
 
 export type DbArticle = {
