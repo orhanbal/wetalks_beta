@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import type { Session, User } from '@supabase/supabase-js';
+import type { LocalSession as Session, LocalUser as User } from '../lib/supabase';
 import { supabase } from '../lib/supabase';
 
 export interface AuthState {
