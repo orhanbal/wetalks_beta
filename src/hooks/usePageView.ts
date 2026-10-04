@@ -2,8 +2,6 @@ import { useEffect } from 'react';
 import type { Route } from './useRouter';
 
 const EDGE_URL = 'https://auth.webrising.tr/functions/wetalks/track-pageview';
-const ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY as string;
-
 function getSessionId(): string {
   const key = 'pv_session';
   let id = sessionStorage.getItem(key);
@@ -55,8 +53,6 @@ export function usePageView(route: Route) {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${ANON_KEY}`,
-          'Apikey': ANON_KEY,
         },
         body: JSON.stringify({
           page,
