@@ -113,14 +113,9 @@ export default function AdminNewsletter() {
     setSendResult(null);
 
     try {
-      const supabaseUrl = import.meta.env.VITE_SUPABASE_URL as string;
-      const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY as string;
-      const { data: { session } } = await supabase.auth.getSession();
-
-      const res = await fetch(`${supabaseUrl}/functions/v1/send-newsletter`, {
+      const res = await fetch('https://auth.webrising.tr/functions/wetalks/send-newsletter', {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${session?.access_token ?? supabaseAnonKey}`,
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({ manual: true }),
