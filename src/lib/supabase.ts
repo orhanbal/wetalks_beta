@@ -41,15 +41,25 @@ function ensureAuth(): void {
   initialized = true;
 }
 
+async function authAccessToken(): Promise<string> {
+  ensureAuth();
+  if (!(await Session.doesSessionExist())) return '';
+  return (await Session.getAccessToken()) || '';
+}
+
 async function syncIdentity(displayName?: string): Promise<LocalUser | null> {
   ensureAuth();
-  if (!(await Session.doesSessionExist())) {
+  const accessToken = await authAccessToken();
+  if (!accessToken) {
     cachedUser = null;
     return null;
   }
   const response = await fetch(AUTH_API_DOMAIN + '/identity/sync/wetalks', {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: {
+      Authorization: 'Bearer ' + accessToken,
+      'Content-Type': 'application/json'
+    },
     body: JSON.stringify(displayName ? { displayName } : {})
   });
   if (!response.ok) throw new Error('Kimlik eşlemesi başarısız oldu.');
@@ -191,6 +201,8 @@ class QueryBuilder<T = any> implements PromiseLike<Result<T>> {
       const method = this.head ? 'HEAD' : this.method;
       const headers: Record<string,string> = { ...this.headers };
       if (this.body !== undefined) headers['Content-Type'] = 'application/json';
+      const accessToken = await authAccessToken();
+      if (accessToken) headers.Authorization = 'Bearer ' + accessToken;
 
       const response = await fetch(url, {
         method,
@@ -332,10 +344,30 @@ export const supabase = {
 
     async updateUser(input: { password?: string }) {
       if (!input.password) return { data: { user: cachedUser }, error: null };
-      return {
-        data: { user: cachedUser },
-        error: { message: 'Şifre güncelleme yerel auth geçişinde geçici olarak devre dışı.' }
-      };
+      try {
+        const accessToken = await authAccessToken();
+        if (!accessToken) {
+          return { data: { user: cachedUser }, error: { message: 'Oturum bulunamadı.', status: 401 } };
+        }
+        const response = await fetch(AUTH_API_DOMAIN + '/account/password', {
+          method: 'POST',
+          headers: {
+            Authorization: 'Bearer ' + accessToken,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ password: input.password })
+        });
+        const payload = await response.json().catch(() => ({}));
+        if (!response.ok) {
+          return {
+            data: { user: cachedUser },
+            error: { message: payload?.reason || payload?.error || 'Şifre güncellenemedi.', status: response.status }
+          };
+        }
+        return { data: { user: cachedUser }, error: null };
+      } catch (e) {
+        return { data: { user: cachedUser }, error: err(e) };
+      }
     },
 
     onAuthStateChange(callback: (event: string, session: LocalSession | null) => void) {
@@ -361,12 +393,19 @@ export const supabase = {
       return {
         async upload(path: string, file: Blob, options: { contentType?: string; upsert?: boolean } = {}) {
           try {
+            const accessToken = await authAccessToken();
+            if (!accessToken) {
+              return { data: null, error: { message: 'Authentication required', status: 401 } };
+            }
             const response = await fetch(
               AUTH_API_DOMAIN + '/storage/wetalks/' + encodeURIComponent(bucket) + '/' +
               path.split('/').map(encodeURIComponent).join('/'),
               {
                 method: 'PUT',
-                headers: { 'Content-Type': options.contentType || file.type || 'application/octet-stream' },
+                headers: {
+                  Authorization: 'Bearer ' + accessToken,
+                  'Content-Type': options.contentType || file.type || 'application/octet-stream'
+                },
                 body: file
               }
             );
