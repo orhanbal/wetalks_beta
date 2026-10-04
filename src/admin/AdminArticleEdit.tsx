@@ -321,13 +321,10 @@ export default function AdminArticleEdit({ id, navigate, isNew, userRole = 'admi
     setNotifying(true);
     setNotifyError('');
     try {
-      const supabaseUrl = import.meta.env.VITE_SUPABASE_URL as string;
-      const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY as string;
-      const res = await fetch(`${supabaseUrl}/functions/v1/notify-article`, {
+      const res = await fetch('https://auth.webrising.tr/functions/wetalks/notify-article', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${supabaseKey}`,
         },
         body: JSON.stringify({ article_id: id, notify_followers: true, notify_subscribers: true }),
       });
