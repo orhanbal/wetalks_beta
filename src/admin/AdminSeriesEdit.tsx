@@ -567,13 +567,9 @@ export default function AdminSeriesEdit({ id, navigate, isNew, userRole = 'admin
     setNotifyError('');
     setNotifySent(null);
     try {
-      const { data: { session } } = await supabase.auth.getSession();
-      const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-      const anonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
-      const res = await fetch(`${supabaseUrl}/functions/v1/notify-series-chapter`, {
+      const res = await fetch('https://auth.webrising.tr/functions/wetalks/notify-series-chapter', {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${session?.access_token ?? anonKey}`,
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({ series_id: form.id, article_id: notifyArticleId }),
