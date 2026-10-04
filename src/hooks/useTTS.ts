@@ -142,16 +142,10 @@ export function useTTS(text: string) {
     setProgress(0);
 
     try {
-      const { data: { session } } = await supabase.auth.getSession();
-      const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-      const anonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
-
-      const res = await fetch(`${supabaseUrl}/functions/v1/generate-tts`, {
+      const res = await fetch('https://auth.webrising.tr/functions/wetalks/generate-tts', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${session?.access_token ?? anonKey}`,
-          'Apikey': anonKey,
         },
         body: JSON.stringify({ text }),
       });
