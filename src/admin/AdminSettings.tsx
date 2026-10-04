@@ -426,17 +426,6 @@ export default function AdminSettings() {
     display: 'block', fontSize: '0.75rem', fontWeight: 600, color: '#374151', marginBottom: '0.375rem',
   };
 
-  const [supabaseUrl, setSupabaseUrl] = useState('');
-  const [supabaseAnonKey, setSupabaseAnonKey] = useState('');
-  const [supabaseUrlSaved, setSupabaseUrlSaved] = useState(false);
-  const [supabaseKeySaved, setSupabaseKeySaved] = useState(false);
-  const [showAnonKey, setShowAnonKey] = useState(false);
-
-  useEffect(() => {
-    setSupabaseUrl(import.meta.env.VITE_SUPABASE_URL ?? '');
-    setSupabaseAnonKey(import.meta.env.VITE_SUPABASE_ANON_KEY ?? '');
-  }, []);
-
   const sidebarItems = [
     { id: 'setup', label: 'Kurulum' },
     { id: 'general', label: 'Genel' },
@@ -542,82 +531,39 @@ export default function AdminSettings() {
           {activeSection === 'setup' && (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
 
-              {/* Supabase entegrasyonu */}
-              <div style={{ background: '#fff', border: '1px solid #e5e7eb', borderRadius: 10, padding: '1.5rem', display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+              {/* WebRising local stack */}
+              <div style={{ background: '#fff', border: '1px solid #e5e7eb', borderRadius: 10, padding: '1.5rem', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                  <div style={{ width: 36, height: 36, borderRadius: 8, background: '#3ecf8e1a', border: '1px solid #3ecf8e40', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M21.362 9.354H12V.396a.396.396 0 0 0-.716-.233L2.203 12.424l-.401.562a1.04 1.04 0 0 0 .836 1.659H12v8.959a.396.396 0 0 0 .716.233l9.081-12.261.401-.562a1.04 1.04 0 0 0-.836-1.66z" fill="#3ecf8e"/></svg>
+                  <div style={{ width: 36, height: 36, borderRadius: 8, background: '#eff6ff', border: '1px solid #bfdbfe', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                    <span style={{ fontSize: '1rem' }}>◈</span>
                   </div>
                   <div>
-                    <h2 style={{ fontSize: '0.9375rem', fontWeight: 700, color: '#111', margin: 0 }}>Supabase Entegrasyonu</h2>
-                    <p style={{ fontSize: '0.8rem', color: '#6b7280', margin: 0, marginTop: 2 }}>Veritabanı ve depolama bağlantı bilgileri</p>
+                    <h2 style={{ fontSize: '0.9375rem', fontWeight: 700, color: '#111', margin: 0 }}>WebRising Yerel Altyapı</h2>
+                    <p style={{ fontSize: '0.8rem', color: '#6b7280', margin: 0, marginTop: 2 }}>PostgreSQL, SuperTokens ve MinIO</p>
                   </div>
                 </div>
 
-                {/* Bağlantı durumu */}
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.75rem 1rem', background: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: 8 }}>
                   <span style={{ width: 8, height: 8, borderRadius: '50%', background: '#22c55e', display: 'inline-block', flexShrink: 0 }} />
-                  <span style={{ fontSize: '0.8125rem', color: '#166534', fontWeight: 500 }}>Supabase bağlantısı aktif</span>
+                  <span style={{ fontSize: '0.8125rem', color: '#166534', fontWeight: 500 }}>Yerel altyapı bağlantısı aktif</span>
                 </div>
 
-                {/* URL */}
-                <div>
-                  <label style={labelStyle}>Proje URL</label>
-                  <div style={{ display: 'flex', gap: '0.5rem' }}>
-                    <input
-                      type="text"
-                      value={supabaseUrl}
-                      readOnly
-                      style={{ ...inputStyle, flex: 1, background: '#f9fafb', color: '#374151', cursor: 'default', fontFamily: "'JetBrains Mono', monospace", fontSize: '0.8rem' }}
-                    />
-                    <button
-                      onClick={() => { navigator.clipboard.writeText(supabaseUrl); setSupabaseUrlSaved(true); setTimeout(() => setSupabaseUrlSaved(false), 2000); }}
-                      style={{ padding: '0.5rem 0.875rem', border: '1px solid #e5e7eb', borderRadius: 6, background: supabaseUrlSaved ? '#f0fdf4' : '#fff', color: supabaseUrlSaved ? '#16a34a' : '#374151', fontSize: '0.8125rem', fontWeight: 600, cursor: 'pointer', fontFamily: 'Inter, sans-serif', whiteSpace: 'nowrap', transition: 'all 0.15s' }}
-                    >
-                      {supabaseUrlSaved ? 'Kopyalandı!' : 'Kopyala'}
-                    </button>
-                  </div>
-                  <p style={{ fontSize: '0.75rem', color: '#9ca3af', margin: '0.375rem 0 0' }}>
-                    Supabase proje dashboard'undan alınan URL. <code style={{ fontSize: '0.7rem', background: '#f3f4f6', padding: '1px 4px', borderRadius: 3 }}>VITE_SUPABASE_URL</code>
-                  </p>
-                </div>
-
-                {/* Anon Key */}
-                <div>
-                  <label style={labelStyle}>Anon / Public Key</label>
-                  <div style={{ display: 'flex', gap: '0.5rem' }}>
-                    <div style={{ flex: 1, position: 'relative' }}>
-                      <input
-                        type={showAnonKey ? 'text' : 'password'}
-                        value={supabaseAnonKey}
-                        readOnly
-                        style={{ ...inputStyle, width: '100%', background: '#f9fafb', color: '#374151', cursor: 'default', fontFamily: "'JetBrains Mono', monospace", fontSize: '0.8rem', paddingRight: '2.5rem', boxSizing: 'border-box' }}
-                      />
-                      <button
-                        onClick={() => setShowAnonKey(v => !v)}
-                        style={{ position: 'absolute', right: 10, top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', color: '#9ca3af', padding: 0, display: 'flex' }}
-                      >
-                        {showAnonKey
-                          ? <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94"/><path d="M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
-                          : <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
-                        }
-                      </button>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.625rem' }}>
+                  {[
+                    { name: 'PostgreSQL', desc: 'Merkezi veritabanı / RLS' },
+                    { name: 'SuperTokens', desc: 'Yerel kullanıcı kimliği' },
+                    { name: 'PostgREST', desc: 'RLS uyumlu veri API' },
+                    { name: 'MinIO', desc: 'Avatar ve içerik görselleri' },
+                  ].map(svc => (
+                    <div key={svc.name} style={{ padding: '0.75rem 0.875rem', border: '1px solid #f3f4f6', borderRadius: 8, background: '#fafafa' }}>
+                      <div style={{ fontSize: '0.8125rem', fontWeight: 700, color: '#111' }}>{svc.name}</div>
+                      <div style={{ fontSize: '0.7rem', color: '#9ca3af', marginTop: 2 }}>{svc.desc}</div>
                     </div>
-                    <button
-                      onClick={() => { navigator.clipboard.writeText(supabaseAnonKey); setSupabaseKeySaved(true); setTimeout(() => setSupabaseKeySaved(false), 2000); }}
-                      style={{ padding: '0.5rem 0.875rem', border: '1px solid #e5e7eb', borderRadius: 6, background: supabaseKeySaved ? '#f0fdf4' : '#fff', color: supabaseKeySaved ? '#16a34a' : '#374151', fontSize: '0.8125rem', fontWeight: 600, cursor: 'pointer', fontFamily: 'Inter, sans-serif', whiteSpace: 'nowrap', transition: 'all 0.15s' }}
-                    >
-                      {supabaseKeySaved ? 'Kopyalandı!' : 'Kopyala'}
-                    </button>
-                  </div>
-                  <p style={{ fontSize: '0.75rem', color: '#9ca3af', margin: '0.375rem 0 0' }}>
-                    Herkese açık (public) anahtar. Gizli değil, ancak paylaşırken dikkatli olun. <code style={{ fontSize: '0.7rem', background: '#f3f4f6', padding: '1px 4px', borderRadius: 3 }}>VITE_SUPABASE_ANON_KEY</code>
-                  </p>
+                  ))}
                 </div>
 
-                {/* Info */}
-                <div style={{ background: '#fffbeb', border: '1px solid #fde68a', borderRadius: 8, padding: '0.875rem 1rem', fontSize: '0.8rem', color: '#713f12', lineHeight: 1.6 }}>
-                  <strong>Bu değerleri değiştirmek için</strong> projenizin <code style={{ fontSize: '0.75rem', background: '#fef3c7', padding: '1px 4px', borderRadius: 3 }}>.env</code> dosyasını güncelleyin ve uygulamayı yeniden derleyin. Ortam değişkenleri derleme zamanında gömüldüğünden tarayıcı üzerinden değiştirilemez.
+                <div style={{ background: '#eff6ff', border: '1px solid #bfdbfe', borderRadius: 8, padding: '0.875rem 1rem', fontSize: '0.8rem', color: '#1e3a8a', lineHeight: 1.6 }}>
+                  Uygulama artık Supabase istemci anahtarlarına ihtiyaç duymaz. Kimlik doğrulama ve veri erişimi <strong>auth.webrising.tr</strong> üzerinden sunucu kontrollü yürütülür.
                 </div>
               </div>
 
@@ -648,7 +594,7 @@ export default function AdminSettings() {
                 </div>
               </div>
 
-              {/* Edge Functions */}
+              {/* Yerel Fonksiyonlar */}
               <div style={{ background: '#fff', border: '1px solid #e5e7eb', borderRadius: 10, padding: '1.5rem', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                 <h2 style={{ fontSize: '0.9375rem', fontWeight: 700, color: '#111', margin: 0 }}>Edge Functions</h2>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
@@ -659,7 +605,7 @@ export default function AdminSettings() {
                     <div key={fn.name} style={{ display: 'flex', alignItems: 'flex-start', gap: '0.75rem', padding: '0.75rem 1rem', border: '1px solid #f3f4f6', borderRadius: 8, background: '#fafafa' }}>
                       <span style={{ padding: '2px 7px', borderRadius: 5, background: '#dbeafe', color: '#1d4ed8', fontSize: '0.65rem', fontWeight: 700, fontFamily: 'monospace', marginTop: 2, flexShrink: 0 }}>{fn.method}</span>
                       <div>
-                        <div style={{ fontSize: '0.8125rem', fontWeight: 600, color: '#111', fontFamily: 'monospace' }}>/functions/v1/{fn.name}</div>
+                        <div style={{ fontSize: '0.8125rem', fontWeight: 600, color: '#111', fontFamily: 'monospace' }}>/functions/wetalks/{fn.name}</div>
                         <div style={{ fontSize: '0.75rem', color: '#6b7280', marginTop: 2 }}>{fn.desc}</div>
                       </div>
                     </div>
