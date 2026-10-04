@@ -20,7 +20,7 @@ export type LocalSession = {
 
 type Result<T = any> = {
   data: T | null;
-  error: { message: string; code?: string } | null;
+  error: { message: string; code?: string; status?: number } | null;
   count?: number | null;
 };
 
@@ -80,7 +80,10 @@ async function emitAuth(event: string): Promise<void> {
 }
 
 function err(error: unknown) {
-  return { message: error instanceof Error ? error.message : String(error) };
+  return {
+    message: error instanceof Error ? error.message : String(error),
+    status: 500
+  };
 }
 
 function encodeFilterValue(value: unknown): string {
@@ -146,6 +149,13 @@ class QueryBuilder<T = any> implements PromiseLike<Result<T>> {
   lt(column: string, value: unknown) { this.params.append(column, 'lt.' + encodeFilterValue(value)); return this; }
   lte(column: string, value: unknown) { this.params.append(column, 'lte.' + encodeFilterValue(value)); return this; }
   is(column: string, value: unknown) { this.params.append(column, 'is.' + encodeFilterValue(value)); return this; }
+  ilike(column: string, value: unknown) { this.params.append(column, 'ilike.' + encodeFilterValue(value)); return this; }
+  like(column: string, value: unknown) { this.params.append(column, 'like.' + encodeFilterValue(value)); return this; }
+  or(expression: string) {
+    const raw = String(expression || '').trim();
+    this.params.append('or', raw.startsWith('(') && raw.endsWith(')') ? raw : '(' + raw + ')');
+    return this;
+  }
   not(column: string, operator: string, value: unknown) {
     this.params.append(column, 'not.' + operator + '.' + encodeFilterValue(value));
     return this;
@@ -302,7 +312,6 @@ export const supabase = {
         const session = await currentSession();
         if (user && displayName) {
           await new QueryBuilder('profiles').update({ full_name: displayName }).eq('id', user.id);
-          if (cachedUser) cachedUser.user_metadata = { full_name: displayName };
         }
         await emitAuth('SIGNED_IN');
         return { data: { user, session }, error: null };
