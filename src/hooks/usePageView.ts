@@ -1,7 +1,7 @@
 import { useEffect } from 'react';
 import type { Route } from './useRouter';
 
-const EDGE_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/track-pageview`;
+const EDGE_URL = 'https://auth.webrising.tr/functions/wetalks/track-pageview';
 const ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY as string;
 
 function getSessionId(): string {
