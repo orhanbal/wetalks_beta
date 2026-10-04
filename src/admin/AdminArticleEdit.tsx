@@ -321,10 +321,12 @@ export default function AdminArticleEdit({ id, navigate, isNew, userRole = 'admi
     setNotifying(true);
     setNotifyError('');
     try {
+      const { data: { session } } = await supabase.auth.getSession();
       const res = await fetch('https://auth.webrising.tr/functions/wetalks/notify-article', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          ...(session?.access_token ? { Authorization: `Bearer ${session.access_token}` } : {}),
         },
         body: JSON.stringify({ article_id: id, notify_followers: true, notify_subscribers: true }),
       });
