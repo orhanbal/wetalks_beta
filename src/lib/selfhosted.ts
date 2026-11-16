@@ -529,9 +529,12 @@ function toDbCalendarEvent(item: any) {
 }
 
 function mergeById<T extends { id: string }>(base: T[], remote: T[]) {
+  // Migration rule: wetalks_last is the canonical latest snapshot.
+  // Keep DB-only records, but when IDs collide prefer the latest repository model
+  // until the legacy PostgreSQL dataset is fully migrated to the new schema.
   const map = new Map<string, T>();
-  for (const item of base) map.set(String(item.id), item);
   for (const item of remote) map.set(String(item.id), item);
+  for (const item of base) map.set(String(item.id), item);
   return Array.from(map.values());
 }
 
