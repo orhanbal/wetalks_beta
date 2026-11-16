@@ -915,7 +915,7 @@ export default function AdminSettings() {
                     { value: 'classic', label: 'Klasik', desc: 'Özel CSS, magazin düzeni' },
                     { value: 'modern', label: 'Modern', desc: 'Shadcn UI + Tailwind' },
                   ].map(opt => {
-                    const active = (settings['site_style'] ?? 'classic') === opt.value;
+                    const active = (settings['site_style'] ?? 'modern') === opt.value;
                     return (
                       <button
                         key={opt.value}
@@ -944,7 +944,7 @@ export default function AdminSettings() {
                     );
                   })}
                 </div>
-                {(settings['site_style'] ?? 'classic') === 'modern' && (
+                {(settings['site_style'] ?? 'modern') === 'modern' && (
                   <p style={{ fontSize: '0.775rem', color: '#059669', margin: 0, display: 'flex', alignItems: 'center', gap: '0.375rem' }}>
                     Modern tema aktif. Değişiklik kaydedildiğinde anında uygulanır.
                   </p>
