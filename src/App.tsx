@@ -45,7 +45,7 @@ export default function App() {
   const [searchOpen, setSearchOpen] = useState(false);
   usePageView(route);
 
-  const isModern = settings['site_style'] === 'modern';
+  const isModern = (settings['site_style'] ?? 'modern') === 'modern';
 
   useEffect(() => {
     const handleKey = (e: KeyboardEvent) => {
@@ -76,7 +76,7 @@ export default function App() {
   // Apply site_style attribute for CSS targeting — also cache to localStorage so
   // the inline index.html script can set it synchronously on next load (prevents FOUC)
   useEffect(() => {
-    const style = settings['site_style'] ?? 'classic';
+    const style = settings['site_style'] ?? 'modern';
     document.documentElement.setAttribute('data-site-style', style);
     document.body.setAttribute('data-site-style', style);
     localStorage.setItem('site-style', style);
