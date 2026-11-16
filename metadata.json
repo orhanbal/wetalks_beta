@@ -1,0 +1,6 @@
+{
+  "name": "WeTalks",
+  "description": "Premium, modern ve ölçeklenebilir dijital yayın platformu. Yazarlar, düşünürler ve profesyoneller için kaliteli içerik okuma ve yazma ekosistemi.",
+  "requestFramePermissions": ["geolocation"],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
